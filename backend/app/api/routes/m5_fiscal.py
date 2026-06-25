@@ -13,7 +13,7 @@ from app.models.m5_fiscal import ImpuestoDetalle, FiscalObligacion, RetencionesC
 from app.api.schemas.m5_fiscal import (
     ImpuestoDetalleCreate, ImpuestoDetalleResponse,
     FiscalObligacionCreate, FiscalObligacionResponse,
-    RetencionesCobradas​Create, RetencionesCobradas​Response,
+    RetencionesCobradas_Create, RetencionesCobradas_Response,
     ResultadoFiscalProyectadoCreate, ResultadoFiscalProyectadoResponse,
     FiscalResumenResponse
 )
@@ -143,9 +143,9 @@ def update_obligacion(
 
 # ============= RETENCIONES COBRADAS =============
 
-@router.post("/retenciones", response_model=RetencionesCobradas​Response, status_code=201)
+@router.post("/retenciones", response_model=RetencionesCobradas_Response, status_code=201)
 def create_retencion(
-    retencion: RetencionesCobradas​Create,
+    retencion: RetencionesCobradas_Create,
     db: Session = Depends(get_db)
 ):
     """Registrar retención cobrada"""
@@ -156,7 +156,7 @@ def create_retencion(
     return db_retencion
 
 
-@router.get("/retenciones", response_model=List[RetencionesCobradas​Response])
+@router.get("/retenciones", response_model=List[RetencionesCobradas_Response])
 def list_retenciones(
     empresa_id: int = Query(...),
     fecha_inicio: date = Query(...),

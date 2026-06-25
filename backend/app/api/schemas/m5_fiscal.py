@@ -79,7 +79,7 @@ class FiscalObligacionResponse(BaseModel):
         from_attributes = True
 
 
-class RetencionesCobradas​Create(BaseModel):
+class RetencionesCobradas_Create(BaseModel):
     """Schema para registrar retenciones cobradas"""
     empresa_id: int
     fecha: date
@@ -91,7 +91,7 @@ class RetencionesCobradas​Create(BaseModel):
     descripcion: Optional[str] = None
 
 
-class RetencionesCobradas​Response(BaseModel):
+class RetencionesCobradas_Response(BaseModel):
     """Schema para responder con retenciones cobradas"""
     id: int
     empresa_id: int
@@ -146,3 +146,6 @@ class FiscalResumenResponse(BaseModel):
     monto_retenciones_acumulado: float
     proyeccion_anual: Optional[ResultadoFiscalProyectadoResponse]
     fecha_actualizacion: datetime
+
+    class Config:
+        from_attributes = True
