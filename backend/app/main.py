@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from app.db.database import Base, engine
-from app.api.routes import m2_tesoreria, m5_fiscal
+from app.api.routes import m2_tesoreria, m5_fiscal, m1_m3_m4_m6, ml_predictions
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -23,6 +23,10 @@ app = FastAPI(
 # Include financial engines routers
 app.include_router(m2_tesoreria.router)
 app.include_router(m5_fiscal.router)
+app.include_router(m1_m3_m4_m6.router)
+
+# Include ML prediction routes
+app.include_router(ml_predictions.router)
 
 
 @app.get("/health", tags=["Health"])
@@ -69,8 +73,19 @@ async def api_status():
             "quantum_ready": False
         },
         "active_engines": {
+            "M1_control_operativo": "operational",
             "M2_tesoreria": "operational",
-            "M5_fiscal": "operational"
+            "M3_flujos_internos": "operational",
+            "M4_macroeconomico": "operational",
+            "M5_fiscal": "operational",
+            "M6_patrimonio": "operational"
+        },
+        "ml_models": {
+            "cash_flow_predictor": "ready",
+            "tax_liability_forecaster": "ready",
+            "operational_efficiency_scorer": "ready",
+            "anomaly_detector": "ready",
+            "risk_assessor": "ready"
         }
     }
 
