@@ -6,6 +6,11 @@ Financial Intelligence Platform for Emerging Corporate Markets
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from datetime import datetime
+from app.db.database import Base, engine
+from app.api.routes import m2_tesoreria, m5_fiscal
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="O-IAxis by Vrilon",
@@ -14,6 +19,10 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
+
+# Include financial engines routers
+app.include_router(m2_tesoreria.router)
+app.include_router(m5_fiscal.router)
 
 
 @app.get("/health", tags=["Health"])
@@ -55,9 +64,13 @@ async def api_status():
         "timestamp": datetime.utcnow().isoformat(),
         "infrastructure": {
             "backend_ready": True,
-            "database_ready": False,
+            "database_ready": True,
             "ml_engines_ready": False,
             "quantum_ready": False
+        },
+        "active_engines": {
+            "M2_tesoreria": "operational",
+            "M5_fiscal": "operational"
         }
     }
 
