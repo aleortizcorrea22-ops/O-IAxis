@@ -40,6 +40,12 @@ from app.models.m6_patrimonio import (
     TipoActivo, TipoPasivo
 )
 
+# M7-M12 - Finanzas de Frontera
+from app.models.m7_m12_frontera import (
+    CreditScore, CapitalTrabajo, PricingIntelligence,
+    InversionAvanzada, AlertaFraude, BenchmarkSectorial
+)
+
 __all__ = [
     # Base
     "BaseModel",
@@ -61,4 +67,7 @@ __all__ = [
     # M6
     "Activo", "Pasivo", "EstadoPatrimonial", "RatiosCapital",
     "TipoActivo", "TipoPasivo",
+    # M7-M12
+    "CreditScore", "CapitalTrabajo", "PricingIntelligence",
+    "InversionAvanzada", "AlertaFraude", "BenchmarkSectorial",
 ]
