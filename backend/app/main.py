@@ -14,9 +14,13 @@ from app.api.routes import (
     auth, m2_tesoreria, m5_fiscal, m1_m3_m4_m6,
     m7_m12_frontera, ml_predictions, quantum
 )
+from app.services.seed import seed_demo_data
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Auto-seed demo data if empty
+seed_demo_data()
 
 _docs_url = "/api/docs" if settings.DEBUG else None
 _redoc_url = "/api/redoc" if settings.DEBUG else None

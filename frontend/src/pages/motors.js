@@ -4,6 +4,85 @@
 
 const Pages = {
 
+  // ===== M6 PATRIMONIO =====
+  async patrimonio() {
+    setPage("M6 — Patrimonio", `
+      <div class="page">
+        <div class="section-header">
+          <div class="section-title">Motor M6 — Patrimonio y Activos</div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Agregar Activo</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="pat-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+                <option value="inmueble">Inmueble</option>
+                <option value="vehiculo">Vehículo</option>
+                <option value="maquinaria">Maquinaria</option>
+                <option value="equipo">Equipo Informático</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <input id="pat-desc" type="text" placeholder="Oficina central" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Valor en Libros ($)</label>
+              <input id="pat-vlibro" type="number" placeholder="5000000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Valor de Mercado ($)</label>
+              <input id="pat-vmercado" type="number" placeholder="7000000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="agregarActivo()">+ Agregar Activo</button>
+          <div id="pat-result" style="margin-top:12px"></div>
+        </div>
+        <div id="patrimonio-content"><div class="spinner"></div></div>
+      </div>
+    `);
+
+    const activos = await API.activos(EMPRESA_ID).catch(() => ({ total_activos: 0, activos: [] }));
+
+    let html = "";
+    if (activos.total_activos) {
+      html += `
+        <div class="kpi-grid" style="margin-bottom:16px">
+          ${kpi("Total Activos", fmtARS(activos.total_activos), "Balance patrimonial", "pos", "🏦")}
+        </div>
+      `;
+    }
+
+    html += `<div class="card">
+      <div class="card-title">Inventario de Activos</div>`;
+    if (activos.activos?.length) {
+      html += `<div class="table-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Descripción</th><th>Valor Libro</th><th>Valor Mercado</th><th>Diferencia</th></tr></thead>
+        <tbody>
+          ${activos.activos.map(a => {
+            const diff = (a.valor_mercado || a.valor_libro) - a.valor_libro;
+            return `
+              <tr>
+                <td><span class="badge badge-info">${a.tipo}</span></td>
+                <td>${a.descripcion}</td>
+                <td>${fmtARS(a.valor_libro)}</td>
+                <td>${fmtARS(a.valor_mercado || a.valor_libro)}</td>
+                <td style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'}">${diff >= 0 ? '+' : ''}${fmtARS(diff)}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table></div>`;
+    } else {
+      html += `<p style="color:var(--gray-400);font-size:12px">Sin activos registrados.</p>`;
+    }
+    html += "</div>";
+
+    document.getElementById("patrimonio-content").innerHTML = html;
+  },
+
   // ===== M2 TESORERÍA =====
   async tesoreria() {
     setPage("M2 — Tesorería", `
@@ -573,6 +652,37 @@ async function agregarImpuesto() {
   }
 }
 
+async function agregarActivo() {
+  const el = document.getElementById("pat-result");
+  const tipo = document.getElementById("pat-tipo").value;
+  const desc = document.getElementById("pat-desc").value;
+  const vlibro = parseFloat(document.getElementById("pat-vlibro").value);
+  const vmercado = parseFloat(document.getElementById("pat-vmercado").value);
+
+  if (!desc || !vlibro || !vmercado) {
+    el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.post("/api/v1/motors/m6/activos", {
+      empresa_id: EMPRESA_ID,
+      tipo,
+      descripcion: desc,
+      valor_libro: vlibro,
+      valor_mercado: vmercado
+    });
+    el.innerHTML = `<p style="color:var(--success)">✓ Activo agregado</p>`;
+    document.getElementById("pat-desc").value = "";
+    document.getElementById("pat-vlibro").value = "";
+    document.getElementById("pat-vmercado").value = "";
+    setTimeout(() => Pages.patrimonio(), 1500);
+  } catch (e) {
+    el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+  }
+}
+
 // ===== HELPERS =====
 function setPage(title, html) {
   document.getElementById("topbar-title").textContent = title;
@@ -597,3 +707,4 @@ window.runResourcesDemo = runResourcesDemo;
 window.runFraudDetection = runFraudDetection;
 window.agregarTransaccion = agregarTransaccion;
 window.agregarImpuesto = agregarImpuesto;
+window.agregarActivo = agregarActivo;
