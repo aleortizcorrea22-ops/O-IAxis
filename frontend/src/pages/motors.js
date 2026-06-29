@@ -11,6 +11,33 @@ const Pages = {
         <div class="section-header">
           <div class="section-title">Motor M2 — Tesorería y Flujo de Caja</div>
         </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Agregar Transacción</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="teso-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+                <option value="ingresos">Ingresos</option>
+                <option value="egresos">Egresos</option>
+                <option value="transferencias">Transferencias</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Monto ($)</label>
+              <input id="teso-monto" type="number" placeholder="500000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <input id="teso-desc" type="text" placeholder="Cobranza cliente ABC" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Fecha</label>
+              <input id="teso-fecha" type="date" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="agregarTransaccion()">+ Agregar Transacción</button>
+          <div id="teso-result" style="margin-top:12px"></div>
+        </div>
         <div id="tesoreria-content"><div class="spinner"></div></div>
       </div>
     `);
@@ -74,6 +101,34 @@ const Pages = {
       <div class="page">
         <div class="section-header">
           <div class="section-title">Motor M5 — Gestión Fiscal e Impositiva</div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Registrar Impuesto</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="form-group">
+              <label>Tipo de Impuesto</label>
+              <select id="fisc-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+                <option value="iva">IVA</option>
+                <option value="ingresos_brutos">Ingresos Brutos</option>
+                <option value="ganancias">Ganancias</option>
+                <option value="afip">AFIP General</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Período (AAAA-MM)</label>
+              <input id="fisc-periodo" type="text" placeholder="2026-06" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Base Imponible ($)</label>
+              <input id="fisc-base" type="number" placeholder="500000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+            <div class="form-group">
+              <label>Alícuota (%)</label>
+              <input id="fisc-alicuota" type="number" placeholder="21" step="0.01" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="agregarImpuesto()">+ Registrar Impuesto</button>
+          <div id="fisc-result" style="margin-top:12px"></div>
         </div>
         <div id="fiscal-content"><div class="spinner"></div></div>
       </div>
@@ -455,6 +510,69 @@ async function runFraudDetection() {
   }
 }
 
+// ===== FORM HANDLERS =====
+async function agregarTransaccion() {
+  const el = document.getElementById("teso-result");
+  const tipo = document.getElementById("teso-tipo").value;
+  const monto = parseFloat(document.getElementById("teso-monto").value);
+  const desc = document.getElementById("teso-desc").value;
+  const fecha = document.getElementById("teso-fecha").value;
+
+  if (!monto || !desc || !fecha) {
+    el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.post("/api/v1/motors/m2/transactions", {
+      empresa_id: EMPRESA_ID,
+      tipo,
+      monto,
+      descripcion: desc,
+      fecha
+    });
+    el.innerHTML = `<p style="color:var(--success)">✓ Transacción agregada</p>`;
+    document.getElementById("teso-monto").value = "";
+    document.getElementById("teso-desc").value = "";
+    document.getElementById("teso-fecha").value = "";
+    setTimeout(() => Pages.tesoreria(), 1500);
+  } catch (e) {
+    el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+  }
+}
+
+async function agregarImpuesto() {
+  const el = document.getElementById("fisc-result");
+  const tipo = document.getElementById("fisc-tipo").value;
+  const periodo = document.getElementById("fisc-periodo").value;
+  const base = parseFloat(document.getElementById("fisc-base").value);
+  const alicuota = parseFloat(document.getElementById("fisc-alicuota").value) / 100;
+
+  if (!periodo || !base || !alicuota) {
+    el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.post("/api/v1/motors/m5/impuestos", {
+      empresa_id: EMPRESA_ID,
+      tipo_impuesto: tipo,
+      periodo,
+      base_imponible: base,
+      alicuota
+    });
+    el.innerHTML = `<p style="color:var(--success)">✓ Impuesto registrado</p>`;
+    document.getElementById("fisc-base").value = "";
+    document.getElementById("fisc-periodo").value = "";
+    document.getElementById("fisc-alicuota").value = "";
+    setTimeout(() => Pages.fiscal(), 1500);
+  } catch (e) {
+    el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+  }
+}
+
 // ===== HELPERS =====
 function setPage(title, html) {
   document.getElementById("topbar-title").textContent = title;
@@ -477,3 +595,5 @@ window.runPortfolioDemo = runPortfolioDemo;
 window.runPaymentsDemo = runPaymentsDemo;
 window.runResourcesDemo = runResourcesDemo;
 window.runFraudDetection = runFraudDetection;
+window.agregarTransaccion = agregarTransaccion;
+window.agregarImpuesto = agregarImpuesto;
