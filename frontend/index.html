@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O-IAxis by Vrilon — Financial Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="login-page" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="brand">O-IAxis</div>
+      <div class="sub">by Vrilon · Financial Intelligence Platform</div>
+    </div>
+    <h2>Iniciar Sesión</h2>
+    <form id="login-form" onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input id="login-user" type="text" placeholder="rodolfo" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Ingresar</button>
+      <div id="login-err" class="login-error"></div>
+    </form>
+    <div class="login-demo">
+      Demo: <strong>rodolfo / cto2024</strong> · <strong>admin / admin2024</strong> · <strong>demo / demo</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">O-IAxis</div>
+      <div class="sub">by Vrilon</div>
+    </div>
+
+    <div class="sidebar-section">Principal</div>
+    <div class="sidebar-item active" onclick="nav('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+
+    <div class="sidebar-section">Eje A — Control</div>
+    <div class="sidebar-item" onclick="nav('tesoreria')">
+      <span class="icon">💰</span> M2 Tesorería
+    </div>
+    <div class="sidebar-item" onclick="nav('fiscal')">
+      <span class="icon">📋</span> M5 Fiscal
+    </div>
+
+    <div class="sidebar-section">Eje B — Contexto</div>
+    <div class="sidebar-item" onclick="nav('patrimonio')">
+      <span class="icon">🏦</span> M6 Patrimonio
+    </div>
+
+    <div class="sidebar-section">Eje C — Frontera</div>
+    <div class="sidebar-item" onclick="nav('credito')">
+      <span class="icon">🎯</span> M7 Crédito
+    </div>
+    <div class="sidebar-item" onclick="nav('inversiones')">
+      <span class="icon">📈</span> M10 Inversiones
+    </div>
+    <div class="sidebar-item" onclick="nav('fraud')">
+      <span class="icon">🔍</span> M11 Fraude
+      <span class="badge" id="fraud-badge">0</span>
+    </div>
+
+    <div class="sidebar-section">Inteligencia</div>
+    <div class="sidebar-item" onclick="nav('ml')">
+      <span class="icon">🤖</span> ML Engine
+    </div>
+    <div class="sidebar-item" onclick="nav('quantum')">
+      <span class="icon">⚛️</span> Quantum
+      <span class="quantum-label">QAOA</span>
+    </div>
+
+    <div class="sidebar-section">Sistema</div>
+    <div class="sidebar-item" onclick="nav('api')">
+      <span class="icon">📡</span> API Docs
+    </div>
+    <div class="sidebar-item" onclick="doLogout()">
+      <span class="icon">🚪</span> Salir
+    </div>
+
+    <!-- User info at bottom -->
+    <div style="margin-top:auto;padding:16px;border-top:1px solid var(--navy-3);font-size:12px;color:var(--gray-400)">
+      <div id="user-info">—</div>
+      <div id="api-status" style="margin-top:6px;font-size:11px">
+        <span class="dot" style="display:inline-block;width:7px;height:7px;background:var(--gray-400);border-radius:50%;margin-right:4px"></span>
+        Verificando API...
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOPBAR -->
+    <header id="topbar">
+      <div id="topbar-title" class="topbar-title">Dashboard Ejecutivo</div>
+      <div class="topbar-right">
+        <div class="topbar-status">
+          <span class="dot"></span>
+          <span id="api-status-label">API Conectada</span>
+        </div>
+        <span class="topbar-env">O-IAxis v0.1.0</span>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main id="content">
+      <div style="display:flex;align-items:center;justify-content:center;height:100%">
+        <div class="spinner"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="src/services/api.js"></script>
+<script src="src/services/auth.js"></script>
+<script src="src/components/charts.js"></script>
+<script src="src/pages/dashboard.js"></script>
+<script src="src/pages/motors.js"></script>
+
+<script>
+// ===== ROUTER / APP INIT =====
+
+let currentPage = "dashboard";
+
+function nav(page) {
+  currentPage = page;
+  // Update active sidebar item
+  document.querySelectorAll(".sidebar-item").forEach(el => el.classList.remove("active"));
+  event.currentTarget.classList.add("active");
+
+  switch (page) {
+    case "dashboard":   renderDashboard(); break;
+    case "tesoreria":   Pages.tesoreria(); break;
+    case "fiscal":      Pages.fiscal(); break;
+    case "patrimonio":  renderPatrimonio(); break;
+    case "credito":     renderCredito(); break;
+    case "inversiones": renderInversiones(); break;
+    case "fraud":       Pages.fraud(); break;
+    case "ml":          Pages.ml(); break;
+    case "quantum":     Pages.quantum(); break;
+    case "api":         renderApiDocs(); break;
+    default:            renderDashboard();
+  }
+}
+
+// ===== AUTH =====
+function doLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById("login-user").value.trim();
+  const p = document.getElementById("login-pass").value;
+  const session = AUTH.login(u, p);
+
+  if (session) {
+    document.getElementById("login-page").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    document.getElementById("user-info").textContent =
+      `${session.user.nombre} · ${session.user.role}`;
+    initApp();
+  } else {
+    document.getElementById("login-err").textContent = "Usuario o contraseña incorrectos";
+  }
+}
+
+function doLogout() {
+  AUTH.logout();
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-page").style.display = "flex";
+  document.getElementById("login-err").textContent = "";
+}
+
+// ===== INIT =====
+async function initApp() {
+  // Check API health
+  try {
+    await API.health();
+    document.getElementById("api-status-label").textContent = "API Conectada";
+    document.getElementById("api-status").innerHTML =
+      `<span style="display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:4px;animation:pulse 2s infinite"></span>localhost:8000`;
+  } catch {
+    document.getElementById("api-status-label").textContent = "API no disponible";
+    toast("El servidor backend no está disponible en localhost:8000", "error");
+  }
+
+  // Update fraud badge
+  try {
+    const fd = await API.alertasFraude(1);
+    const count = fd.alertas_abiertas || 0;
+    document.getElementById("fraud-badge").textContent = count;
+    if (count === 0) document.getElementById("fraud-badge").style.display = "none";
+  } catch {}
+
+  // Render dashboard
+  renderDashboard();
+}
+
+// ===== SIMPLE PAGES =====
+async function renderPatrimonio() {
+  document.getElementById("topbar-title").textContent = "M6 — Patrimonio";
+  document.getElementById("content").innerHTML = `<div class="page"><div class="spinner"></div></div>`;
+  const activos = await API.activos(EMPRESA_ID).catch(() => ({ total_activos: 0, activos: [] }));
+  const balance = await API.balance(EMPRESA_ID).catch(() => null);
+
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header">
+        <div class="section-title">Motor M6 — Patrimonio y Capital</div>
+      </div>
+      <div class="kpi-grid" style="margin-bottom:16px">
+        ${kpi("Total Activos", fmtARS(activos.total_activos), `${activos.cantidad || 0} registros`, "pos", "🏦")}
+        ${balance ? kpi("Patrimonio", fmtARS(balance.patrimonio), "Balance actualizado", "pos", "💎") : ""}
+        ${balance ? kpi("Total Pasivos", fmtARS(balance.pasivos), "Deudas y obligaciones", "neg", "📉") : ""}
+      </div>
+      <div class="card">
+        <div class="card-title">Detalle de Activos</div>
+        ${activos.activos?.length ? `
+          <div class="table-wrap"><table>
+            <thead><tr><th>Tipo</th><th>Descripción</th><th>Valor Libro</th><th>Valor Mercado</th></tr></thead>
+            <tbody>
+              ${activos.activos.map(a => `
+                <tr>
+                  <td><span class="badge badge-info">${a.tipo}</span></td>
+                  <td>${a.descripcion}</td>
+                  <td>${fmtARS(a.valor_libro)}</td>
+                  <td>${fmtARS(a.valor_mercado)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table></div>
+        ` : `<p style="color:var(--gray-400);font-size:12px">Sin activos registrados. Usar <code>POST /api/v1/motors/m6/activos</code></p>`}
+      </div>
+    </div>
+  `;
+}
+
+async function renderCredito() {
+  document.getElementById("topbar-title").textContent = "M7 — Crédito";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header">
+        <div class="section-title">Motor M7 — Credit Scoring Alternativo</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Calculadora de Score Crediticio</div>
+        <p style="color:var(--gray-400);font-size:12px;margin-bottom:16px">Dictamen de carácter exclusivamente informativo (Doc1, motores 6, 7, 9 y 11)</p>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Ingresos Anuales ($)</label><input id="cr-ing" type="number" value="5000000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)"></div>
+          <div class="form-group"><label>Deuda Total ($)</label><input id="cr-deu" type="number" value="1500000" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)"></div>
+          <div class="form-group"><label>Historial de Pago (0-1)</label><input id="cr-his" type="number" value="0.85" min="0" max="1" step="0.01" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)"></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcularScore()">Calcular Score</button>
+        <div id="score-result" style="margin-top:16px"></div>
+      </div>
+    </div>
+  `;
+}
+
+async function calcularScore() {
+  const el = document.getElementById("score-result");
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    const ing = document.getElementById("cr-ing").value;
+    const deu = document.getElementById("cr-deu").value;
+    const his = document.getElementById("cr-his").value;
+    const r = await API.creditScore(EMPRESA_ID, ing, deu, his);
+    const color = r.score >= 700 ? "var(--success)" : r.score >= 500 ? "var(--warning)" : "var(--danger)";
+    el.innerHTML = `
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:12px">
+        <div>
+          <div style="font-size:11px;color:var(--gray-400)">SCORE</div>
+          <div style="font-size:48px;font-weight:800;color:${color}">${r.score.toFixed(0)}</div>
+          <div style="font-size:11px;color:var(--gray-400)">/ 1000</div>
+        </div>
+        <div style="flex:1">
+          <div style="margin-bottom:8px"><span class="badge" style="font-size:16px;padding:4px 14px;background:rgba(0,180,216,.15);color:var(--teal)">${r.rating}</span></div>
+          <div style="font-size:13px;margin:6px 0">Prob. default: <strong style="color:${color}">${(r.probabilidad_default*100).toFixed(1)}%</strong></div>
+          <div style="font-size:13px;margin:6px 0">Ratio deuda/ing: <strong>${r.ratio_deuda_ingresos.toFixed(3)}</strong></div>
+          <div style="font-size:11px;color:var(--gray-600);margin-top:12px">${r.dictamen}</div>
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    el.innerHTML = `<p style="color:var(--danger);font-size:12px">${e.message}</p>`;
+  }
+}
+
+async function renderInversiones() {
+  document.getElementById("topbar-title").textContent = "M10 — Inversiones";
+  document.getElementById("content").innerHTML = `<div class="page"><div class="spinner"></div></div>`;
+  const data = await API.inversiones(EMPRESA_ID).catch(() => ({ total_invertido: 0, inversiones: [] }));
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M10 — Inversiones Avanzada</div></div>
+      <div class="kpi-grid" style="margin-bottom:16px">
+        ${kpi("Total Invertido", fmtARS(data.total_invertido), `${data.cantidad || 0} instrumentos`, "pos", "📈")}
+      </div>
+      <div class="card">
+        <div class="card-title">Portafolio de Inversiones</div>
+        ${data.inversiones?.length ? `
+          <div class="table-wrap"><table>
+            <thead><tr><th>Instrumento</th><th>Tipo</th><th>Monto</th><th>Tasa</th><th>Riesgo</th><th>Retorno Anual</th></tr></thead>
+            <tbody>
+              ${data.inversiones.map(i => `
+                <tr>
+                  <td style="font-weight:600">${i.instrumento}</td>
+                  <td><span class="badge badge-info">${i.tipo}</span></td>
+                  <td>${fmtARS(i.monto)}</td>
+                  <td>${(i.tasa*100).toFixed(1)}%</td>
+                  <td><span class="badge ${i.riesgo==='bajo'?'badge-success':i.riesgo==='medio'?'badge-warning':'badge-danger'}">${i.riesgo}</span></td>
+                  <td style="color:var(--success)">${fmtARS(i.monto*i.tasa)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table></div>
+        ` : `<p style="color:var(--gray-400);font-size:12px">Sin inversiones registradas. Usar <code>POST /api/v1/motors/m10/inversiones</code></p>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderApiDocs() {
+  document.getElementById("topbar-title").textContent = "API Docs";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Documentación de la API</div></div>
+      <div class="card">
+        <p style="color:var(--gray-400);margin-bottom:16px">La documentación interactiva está disponible en el servidor FastAPI.</p>
+        <div style="display:flex;gap:12px">
+          <a href="http://localhost:8000/api/docs" target="_blank" class="btn btn-primary">📖 Swagger UI</a>
+          <a href="http://localhost:8000/api/redoc" target="_blank" class="btn btn-ghost">📘 ReDoc</a>
+          <a href="http://localhost:8000/health" target="_blank" class="btn btn-ghost">💚 Health Check</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== TOAST =====
+function toast(msg, type = "info") {
+  const c = document.getElementById("toast-container");
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+window.toast = toast;
+
+// ===== BOOTSTRAP =====
+(function() {
+  if (AUTH.isAuthenticated()) {
+    const session = AUTH.getSession();
+    document.getElementById("app").style.display = "flex";
+    document.getElementById("user-info").textContent =
+      `${session.user.nombre} · ${session.user.role}`;
+    initApp();
+  } else {
+    document.getElementById("login-page").style.display = "flex";
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -88,7 +88,7 @@ def assess_financial_risk(
 @router.post("/forecast/revenue-growth")
 def forecast_revenue_growth(
     historical_revenue: List[float] = Query(...),
-    market_conditions: str = Query("stable", regex="^(optimistic|stable|pessimistic)$")
+    market_conditions: str = Query("stable", pattern="^(optimistic|stable|pessimistic)$")
 ):
     """
     Forecast revenue growth

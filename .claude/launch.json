@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "O-IAxis Frontend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "C:\\Users\\Ortiz Alejandro\\O-IAxis\\frontend"],
+      "port": 3000
+    }
+  ]
+}
