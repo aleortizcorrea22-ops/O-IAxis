@@ -82,6 +82,7 @@ def seed_demo_data():
                 periodo="202606",
                 base_imponible=500000,
                 alicuota=0.21,
+                monto_impuesto=105000,
                 fecha_vencimiento=datetime.now() - timedelta(days=5),
             ),
             ImpuestoDetalle(
@@ -90,6 +91,7 @@ def seed_demo_data():
                 periodo="202606",
                 base_imponible=850000,
                 alicuota=0.05,
+                monto_impuesto=42500,
                 fecha_vencimiento=datetime.now() - timedelta(days=3),
             ),
             ImpuestoDetalle(
@@ -98,6 +100,7 @@ def seed_demo_data():
                 periodo="202606",
                 base_imponible=320000,
                 alicuota=0.30,
+                monto_impuesto=96000,
                 fecha_vencimiento=datetime.now() + timedelta(days=20),
             ),
         ]
@@ -116,7 +119,7 @@ def seed_demo_data():
             ),
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.VEHICULOS,
+                tipo_activo=TipoActivo.VEHÍCULOS,
                 descripcion="Camion de reparto 2022",
                 valor_libro=850000,
                 valor_mercado=720000,
@@ -154,7 +157,7 @@ def seed_demo_data():
         pasivos = [
             Pasivo(
                 empresa_id=1,
-                tipo_pasivo=TipoPasivo.PRESTAMOS_LARGO_PLAZO,
+                tipo_pasivo=TipoPasivo.PRÉSTAMOS_LARGO_PLAZO,
                 descripcion="Prestamo Banco Galicia - 36 meses",
                 monto_total=2500000,
                 tasa_interes=0.125,
