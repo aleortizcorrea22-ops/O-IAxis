@@ -130,6 +130,18 @@
 <div id="toast-container"></div>
 
 <!-- ===== SCRIPTS ===== -->
+<script>
+// Global config
+const EMPRESA_ID = 1;
+
+// Global helpers
+function fmtARS(n) {
+  if (!n && n !== 0) return "—";
+  if (Math.abs(n) >= 1e6) return `$ ${(n / 1e6).toFixed(2)}M`;
+  if (Math.abs(n) >= 1e3) return `$ ${(n / 1e3).toFixed(1)}K`;
+  return `$ ${n.toFixed(2)}`;
+}
+</script>
 <script src="src/services/api.js"></script>
 <script src="src/services/auth.js"></script>
 <script src="src/components/charts.js"></script>
