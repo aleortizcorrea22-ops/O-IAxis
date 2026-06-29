@@ -64,16 +64,13 @@ async def health_check():
     Health check endpoint for O-IAxis infrastructure.
     Verifies API responsiveness and system status.
     """
-    return JSONResponse(
-        status_code=200,
-        content={
-            "status": "operational",
-            "service": "O-IAxis by Vrilon",
-            "timestamp": datetime.utcnow().isoformat(),
-            "version": "0.1.0",
-            "phase": "PHASE_5_PRODUCTION_READY"
-        }
-    )
+    return {
+        "status": "operational",
+        "service": "O-IAxis by Vrilon",
+        "timestamp": datetime.utcnow().isoformat(),
+        "version": "0.1.0",
+        "phase": "PHASE_5_PRODUCTION_READY"
+    }
 
 
 @app.get("/", tags=["Root"])

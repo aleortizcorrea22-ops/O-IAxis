@@ -2,8 +2,6 @@
  * O-IAxis Dashboard — Resumen ejecutivo con KPIs, salud del sistema y quick-wins
  */
 
-const EMPRESA_ID = 1;
-
 async function renderDashboard() {
   const content = document.getElementById("content");
   content.innerHTML = `
