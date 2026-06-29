@@ -59,7 +59,7 @@ const Pages = {
       <div class="card-title">Inventario de Activos</div>`;
     if (activos.activos?.length) {
       html += `<div class="table-wrap"><table>
-        <thead><tr><th>Tipo</th><th>Descripción</th><th>Valor Libro</th><th>Valor Mercado</th><th>Diferencia</th></tr></thead>
+        <thead><tr><th>Tipo</th><th>Descripción</th><th>Valor Libro</th><th>Valor Mercado</th><th>Diferencia</th><th>Acción</th></tr></thead>
         <tbody>
           ${activos.activos.map(a => {
             const diff = (a.valor_mercado || a.valor_libro) - a.valor_libro;
@@ -70,6 +70,7 @@ const Pages = {
                 <td>${fmtARS(a.valor_libro)}</td>
                 <td>${fmtARS(a.valor_mercado || a.valor_libro)}</td>
                 <td style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'}">${diff >= 0 ? '+' : ''}${fmtARS(diff)}</td>
+                <td><button onclick="borrarActivo(${a.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
               </tr>
             `;
           }).join("")}
@@ -152,7 +153,7 @@ const Pages = {
     `;
     if (txs.status === "fulfilled" && txs.value.length) {
       html += `<div class="table-wrap"><table>
-        <thead><tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Referencia</th><th>Estado</th></tr></thead>
+        <thead><tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Referencia</th><th>Estado</th><th>Acción</th></tr></thead>
         <tbody>
           ${txs.value.map(t => `
             <tr>
@@ -162,6 +163,7 @@ const Pages = {
               <td>${fmtARS(t.monto)}</td>
               <td style="color:var(--gray-400)">${t.referencia}</td>
               <td><span class="badge badge-info">${t.status}</span></td>
+              <td><button onclick="borrarTransaccion(${t.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -225,7 +227,7 @@ const Pages = {
       <div class="card-title">Impuestos Registrados</div>`;
     if (impuestos.status === "fulfilled" && impuestos.value.length) {
       html += `<div class="table-wrap"><table>
-        <thead><tr><th>ID</th><th>Tipo</th><th>Período</th><th>Base Imponible</th><th>Alícuota</th><th>Monto</th><th>Estado</th></tr></thead>
+        <thead><tr><th>ID</th><th>Tipo</th><th>Período</th><th>Base Imponible</th><th>Alícuota</th><th>Monto</th><th>Estado</th><th>Acción</th></tr></thead>
         <tbody>
           ${impuestos.value.map(i => `
             <tr>
@@ -236,6 +238,7 @@ const Pages = {
               <td>${i.alicuota}%</td>
               <td>${fmtARS(i.monto_impuesto)}</td>
               <td><span class="badge ${i.estado === 'pagado' ? 'badge-success' : i.estado === 'vencido' ? 'badge-danger' : 'badge-warning'}">${i.estado}</span></td>
+              <td><button onclick="borrarImpuesto(${i.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -683,6 +686,40 @@ async function agregarActivo() {
   }
 }
 
+// Funciones para borrar datos
+async function borrarTransaccion(id) {
+  if (!confirm("¿Borrar esta transacción?")) return;
+  try {
+    await API.request(`/api/v1/motors/m2/transactions/${id}`, { method: "DELETE" });
+    showToast("Transacción eliminada");
+    Pages.tesoreria();
+  } catch (e) {
+    showToast("Error al borrar: " + e.message, "error");
+  }
+}
+
+async function borrarImpuesto(id) {
+  if (!confirm("¿Borrar este impuesto?")) return;
+  try {
+    await API.request(`/api/v1/motors/m5/impuestos/${id}`, { method: "DELETE" });
+    showToast("Impuesto eliminado");
+    Pages.fiscal();
+  } catch (e) {
+    showToast("Error al borrar: " + e.message, "error");
+  }
+}
+
+async function borrarActivo(id) {
+  if (!confirm("¿Borrar este activo?")) return;
+  try {
+    await API.request(`/api/v1/motors/m6/activos/${id}`, { method: "DELETE" });
+    showToast("Activo eliminado");
+    Pages.patrimonio();
+  } catch (e) {
+    showToast("Error al borrar: " + e.message, "error");
+  }
+}
+
 // ===== HELPERS =====
 function setPage(title, html) {
   document.getElementById("topbar-title").textContent = title;
@@ -708,3 +745,6 @@ window.runFraudDetection = runFraudDetection;
 window.agregarTransaccion = agregarTransaccion;
 window.agregarImpuesto = agregarImpuesto;
 window.agregarActivo = agregarActivo;
+window.borrarTransaccion = borrarTransaccion;
+window.borrarImpuesto = borrarImpuesto;
+window.borrarActivo = borrarActivo;

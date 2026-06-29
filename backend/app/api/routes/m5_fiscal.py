@@ -89,6 +89,18 @@ def update_impuesto(
     return db_impuesto
 
 
+@router.delete("/impuestos/{impuesto_id}", status_code=204)
+def delete_impuesto(impuesto_id: int, db: Session = Depends(get_db)):
+    """Borrar impuesto"""
+    db_impuesto = db.query(ImpuestoDetalle).filter(
+        ImpuestoDetalle.id == impuesto_id
+    ).first()
+    if not db_impuesto:
+        raise HTTPException(status_code=404, detail="Impuesto not found")
+    db.delete(db_impuesto)
+    db.commit()
+
+
 # ============= OBLIGACIONES FISCALES =============
 
 @router.post("/obligaciones", response_model=FiscalObligacionResponse, status_code=201)

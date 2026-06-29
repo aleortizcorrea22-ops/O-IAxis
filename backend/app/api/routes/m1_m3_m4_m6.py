@@ -272,6 +272,17 @@ def list_activos(empresa_id: int, db: Session = Depends(get_db)):
     }
 
 
+@router.delete("/m6/activos/{activo_id}", status_code=204)
+def delete_activo(activo_id: int, db: Session = Depends(get_db)):
+    """Borrar activo"""
+    from fastapi import HTTPException
+    activo = db.query(Activo).filter(Activo.id == activo_id).first()
+    if not activo:
+        raise HTTPException(status_code=404, detail="Activo not found")
+    db.delete(activo)
+    db.commit()
+
+
 @router.get("/m6/balance/{empresa_id}")
 def get_estado_patrimonial(empresa_id: int, db: Session = Depends(get_db)):
     """Obtener estado patrimonial"""
