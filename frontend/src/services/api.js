@@ -36,7 +36,27 @@ const API = {
     });
   },
 
+  // Form-encoded POST for OAuth2 login
+  async postForm(path, body) {
+    const params = new URLSearchParams(body);
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.detail || "Login fallido");
+    }
+    return res.json();
+  },
+
   // ===== ENDPOINTS =====
+
+  // Auth
+  loginJWT(username, password) {
+    return this.postForm("/api/v1/auth/token", { username, password });
+  },
 
   // Health & Status
   health()  { return this.get("/health"); },

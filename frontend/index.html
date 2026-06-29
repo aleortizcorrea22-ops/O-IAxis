@@ -163,11 +163,16 @@ function nav(page) {
 }
 
 // ===== AUTH =====
-function doLogin(e) {
+async function doLogin(e) {
   e.preventDefault();
   const u = document.getElementById("login-user").value.trim();
   const p = document.getElementById("login-pass").value;
-  const session = AUTH.login(u, p);
+  const btn = e.submitter || e.target.querySelector("button[type=submit]");
+  if (btn) btn.disabled = true;
+
+  const session = await AUTH.login(u, p);
+
+  if (btn) btn.disabled = false;
 
   if (session) {
     document.getElementById("login-page").style.display = "none";

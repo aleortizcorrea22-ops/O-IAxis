@@ -5,23 +5,42 @@ Financial Intelligence Platform for Emerging Corporate Markets
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from datetime import datetime
 from app.db.database import Base, engine
+from app.core.config import settings
 from app.api.routes import (
-    m2_tesoreria, m5_fiscal, m1_m3_m4_m6,
+    auth, m2_tesoreria, m5_fiscal, m1_m3_m4_m6,
     m7_m12_frontera, ml_predictions, quantum
 )
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+_docs_url = "/api/docs" if settings.DEBUG else None
+_redoc_url = "/api/redoc" if settings.DEBUG else None
+
 app = FastAPI(
-    title="O-IAxis by Vrilon",
+    title=settings.API_TITLE,
     description="Financial Intelligence Platform - Quantum-Ready Hybrid Infrastructure",
-    version="0.1.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    version=settings.API_VERSION,
+    docs_url=_docs_url,
+    redoc_url=_redoc_url,
 )
+
+# CORS — restricted to configured origins in production
+_origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Empresa-ID"],
+)
+
+# Auth
+app.include_router(auth.router)
 
 # Include financial engines routers (M1-M12)
 app.include_router(m2_tesoreria.router)
@@ -49,7 +68,7 @@ async def health_check():
             "service": "O-IAxis by Vrilon",
             "timestamp": datetime.utcnow().isoformat(),
             "version": "0.1.0",
-            "phase": "PHASE_3_QUANTUM_FRONTIER"
+            "phase": "PHASE_5_PRODUCTION_READY"
         }
     )
 

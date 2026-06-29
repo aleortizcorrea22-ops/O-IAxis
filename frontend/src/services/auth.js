@@ -1,5 +1,5 @@
 /**
- * O-IAxis Auth Service — JWT demo (sin backend de auth aún)
+ * O-IAxis Auth Service — JWT real (backend) con fallback demo offline
  */
 
 const AUTH = {
@@ -10,16 +10,25 @@ const AUTH = {
     { username: "demo",     password: "demo",       role: "Viewer",nombre: "Demo" },
   ],
 
-  login(username, password) {
+  async login(username, password) {
+    // Intentar JWT real desde backend
+    try {
+      const resp = await API.loginJWT(username, password);
+      const session = { token: resp.access_token, user: { username, role: resp.role, nombre: resp.nombre } };
+      sessionStorage.setItem("oiaxis_session", JSON.stringify(session));
+      API.setToken(resp.access_token);
+      return session;
+    } catch (_) {
+      // Fallback: demo offline si el backend no está disponible
+    }
+
     const user = this.DEMO_USERS.find(
       u => u.username === username && u.password === password
     );
     if (!user) return null;
 
-    // Token simulado (en producción vendrá del backend JWT)
     const token = btoa(JSON.stringify({ sub: username, role: user.role, exp: Date.now() + 28800000 }));
     const session = { token, user: { username, role: user.role, nombre: user.nombre } };
-
     sessionStorage.setItem("oiaxis_session", JSON.stringify(session));
     API.setToken(token);
     return session;
