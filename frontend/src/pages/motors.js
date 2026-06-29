@@ -70,7 +70,7 @@ const Pages = {
                 <td>${fmtARS(a.valor_libro)}</td>
                 <td>${fmtARS(a.valor_mercado || a.valor_libro)}</td>
                 <td style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'}">${diff >= 0 ? '+' : ''}${fmtARS(diff)}</td>
-                <td style="display:flex;gap:4px"><button onclick="editarActivo(${a.id}, '${a.tipo}', '${a.descripcion}', ${a.valor_libro}, ${a.valor_mercado})" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarActivo(${a.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+                <td style="display:flex;gap:6px"><button onclick="editarActivo(${a.id}, '${a.tipo}', '${a.descripcion}', ${a.valor_libro}, ${a.valor_mercado})" title="Editar" style="background:var(--teal);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">✏️</button><button onclick="borrarActivo(${a.id})" title="Borrar" style="background:var(--danger);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">🗑️</button></td>
               </tr>
             `;
           }).join("")}
@@ -163,7 +163,7 @@ const Pages = {
               <td>${fmtARS(t.monto)}</td>
               <td style="color:var(--gray-400)">${t.referencia}</td>
               <td><span class="badge badge-info">${t.status}</span></td>
-              <td style="display:flex;gap:4px"><button onclick="editarTransaccion(${t.id}, '${t.tipo}', ${t.monto}, '${t.referencia}')" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarTransaccion(${t.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+              <td style="display:flex;gap:6px"><button onclick="editarTransaccion(${t.id}, '${t.tipo}', ${t.monto}, '${t.referencia}')" title="Editar" style="background:var(--teal);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">✏️</button><button onclick="borrarTransaccion(${t.id})" title="Borrar" style="background:var(--danger);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">🗑️</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -238,7 +238,7 @@ const Pages = {
               <td>${i.alicuota}%</td>
               <td>${fmtARS(i.monto_impuesto)}</td>
               <td><span class="badge ${i.estado === 'pagado' ? 'badge-success' : i.estado === 'vencido' ? 'badge-danger' : 'badge-warning'}">${i.estado}</span></td>
-              <td style="display:flex;gap:4px"><button onclick="editarImpuesto(${i.id}, '${i.tipo_impuesto}', '${i.periodo}', ${i.base_imponible}, ${i.alicuota})" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarImpuesto(${i.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+              <td style="display:flex;gap:6px"><button onclick="editarImpuesto(${i.id}, '${i.tipo_impuesto}', '${i.periodo}', ${i.base_imponible}, ${i.alicuota})" title="Editar" style="background:var(--teal);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">✏️</button><button onclick="borrarImpuesto(${i.id})" title="Borrar" style="background:var(--danger);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">🗑️</button></td>
             </tr>
           `).join("")}
         </tbody>
