@@ -70,7 +70,7 @@ const Pages = {
                 <td>${fmtARS(a.valor_libro)}</td>
                 <td>${fmtARS(a.valor_mercado || a.valor_libro)}</td>
                 <td style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'}">${diff >= 0 ? '+' : ''}${fmtARS(diff)}</td>
-                <td><button onclick="borrarActivo(${a.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+                <td style="display:flex;gap:4px"><button onclick="editarActivo(${a.id}, '${a.tipo}', '${a.descripcion}', ${a.valor_libro}, ${a.valor_mercado})" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarActivo(${a.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
               </tr>
             `;
           }).join("")}
@@ -163,7 +163,7 @@ const Pages = {
               <td>${fmtARS(t.monto)}</td>
               <td style="color:var(--gray-400)">${t.referencia}</td>
               <td><span class="badge badge-info">${t.status}</span></td>
-              <td><button onclick="borrarTransaccion(${t.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+              <td style="display:flex;gap:4px"><button onclick="editarTransaccion(${t.id}, '${t.tipo}', ${t.monto}, '${t.referencia}')" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarTransaccion(${t.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -238,7 +238,7 @@ const Pages = {
               <td>${i.alicuota}%</td>
               <td>${fmtARS(i.monto_impuesto)}</td>
               <td><span class="badge ${i.estado === 'pagado' ? 'badge-success' : i.estado === 'vencido' ? 'badge-danger' : 'badge-warning'}">${i.estado}</span></td>
-              <td><button onclick="borrarImpuesto(${i.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
+              <td style="display:flex;gap:4px"><button onclick="editarImpuesto(${i.id}, '${i.tipo_impuesto}', '${i.periodo}', ${i.base_imponible}, ${i.alicuota})" style="background:var(--teal);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Editar</button><button onclick="borrarImpuesto(${i.id})" style="background:var(--danger);color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px">Borrar</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -720,6 +720,52 @@ async function borrarActivo(id) {
   }
 }
 
+// Funciones para editar
+async function editarTransaccion(id, tipo, monto, referencia) {
+  const nuevoMonto = prompt(`Nuevo monto (actual: ${monto}):`, monto);
+  if (nuevoMonto === null) return;
+  try {
+    await API.request(`/api/v1/motors/m2/transactions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ tipo, monto: parseFloat(nuevoMonto), referencia, empresa_id: EMPRESA_ID, fecha_transaccion: new Date().toISOString().split('T')[0] })
+    });
+    showToast("Transacción actualizada");
+    Pages.tesoreria();
+  } catch (e) {
+    showToast("Error: " + e.message, "error");
+  }
+}
+
+async function editarImpuesto(id, tipo, periodo, base, alicuota) {
+  const nuevaBase = prompt(`Nueva base (actual: ${base}):`, base);
+  if (nuevaBase === null) return;
+  try {
+    await API.request(`/api/v1/motors/m5/impuestos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ tipo_impuesto: tipo, periodo, base_imponible: parseFloat(nuevaBase), alicuota, empresa_id: EMPRESA_ID, fecha_vencimiento: new Date().toISOString().split('T')[0] })
+    });
+    showToast("Impuesto actualizado");
+    Pages.fiscal();
+  } catch (e) {
+    showToast("Error: " + e.message, "error");
+  }
+}
+
+async function editarActivo(id, tipo, desc, vlibro, vmercado) {
+  const nuevoValor = prompt(`Nuevo valor (actual: ${vlibro}):`, vlibro);
+  if (nuevoValor === null) return;
+  try {
+    await API.request(`/api/v1/motors/m6/activos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ tipo_activo: tipo, descripcion: desc, valor_libro: parseFloat(nuevoValor), valor_mercado: parseFloat(nuevoValor), empresa_id: EMPRESA_ID })
+    });
+    showToast("Activo actualizado");
+    Pages.patrimonio();
+  } catch (e) {
+    showToast("Error: " + e.message, "error");
+  }
+}
+
 // ===== HELPERS =====
 function setPage(title, html) {
   document.getElementById("topbar-title").textContent = title;
@@ -748,3 +794,6 @@ window.agregarActivo = agregarActivo;
 window.borrarTransaccion = borrarTransaccion;
 window.borrarImpuesto = borrarImpuesto;
 window.borrarActivo = borrarActivo;
+window.editarTransaccion = editarTransaccion;
+window.editarImpuesto = editarImpuesto;
+window.editarActivo = editarActivo;
