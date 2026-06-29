@@ -109,6 +109,13 @@
     <header id="topbar">
       <div id="topbar-title" class="topbar-title">Dashboard Ejecutivo</div>
       <div class="topbar-right">
+        <select id="empresa-selector" onchange="cambiarEmpresa()" style="background:var(--navy);border:1px solid var(--navy-3);border-radius:6px;padding:6px 10px;color:var(--teal);font-size:12px;cursor:pointer;margin-right:16px">
+          <option value="1" style="background:var(--navy);color:var(--white)">Empresa 1 (Demo)</option>
+          <option value="2" style="background:var(--navy);color:var(--white)">Empresa 2</option>
+          <option value="3" style="background:var(--navy);color:var(--white)">Empresa 3</option>
+          <option value="4" style="background:var(--navy);color:var(--white)">Empresa 4</option>
+          <option value="5" style="background:var(--navy);color:var(--white)">Empresa 5</option>
+        </select>
         <div class="topbar-status">
           <span class="dot"></span>
           <span id="api-status-label">API Conectada</span>
@@ -152,6 +159,41 @@ function fmtARS(n) {
 // ===== ROUTER / APP INIT =====
 
 let currentPage = "dashboard";
+
+// Cambiar empresa
+function cambiarEmpresa() {
+  const numaEmpresa = document.getElementById("empresa-selector").value;
+  window.EMPRESA_ID = parseInt(numaEmpresa);
+  sessionStorage.setItem("empresaId", numaEmpresa);
+
+  // Recargar página actual
+  if (currentPage === "dashboard") {
+    renderDashboard();
+  } else if (currentPage === "tesoreria") {
+    Pages.tesoreria();
+  } else if (currentPage === "fiscal") {
+    Pages.fiscal();
+  } else if (currentPage === "patrimonio") {
+    Pages.patrimonio();
+  } else if (currentPage === "fraud") {
+    Pages.fraud();
+  } else if (currentPage === "ml") {
+    Pages.ml();
+  } else if (currentPage === "quantum") {
+    Pages.quantum();
+  }
+
+  toast(`Empresa ${numaEmpresa} seleccionada`);
+}
+
+// Cargar empresa guardada
+(function() {
+  const saved = sessionStorage.getItem("empresaId");
+  if (saved) {
+    window.EMPRESA_ID = parseInt(saved);
+    document.getElementById("empresa-selector").value = saved;
+  }
+})();
 
 function nav(page) {
   currentPage = page;
