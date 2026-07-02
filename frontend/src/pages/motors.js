@@ -574,7 +574,7 @@ async function runFraudDetection() {
   el.innerHTML = `<div class="spinner"></div>`;
   try {
     const params = series.map(v => `transacciones=${v}`).join("&");
-    const result = await API.get(`/api/v1/motors/m11/detectar-fraude?empresa_id=${EMPRESA_ID}&${params}`);
+    const result = await API.request(`/api/v1/motors/m11/detectar-fraude?empresa_id=${EMPRESA_ID}&${params}`, { method: "POST" });
     el.innerHTML = `
       <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:${result.total_anomalias > 0 ? 'var(--danger)' : 'var(--success)'}">
         ${result.total_anomalias > 0 ? `⚠ ${result.total_anomalias} anomalía(s) detectadas` : "✓ Sin anomalías detectadas"}
