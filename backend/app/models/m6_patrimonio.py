@@ -1,35 +1,9 @@
 """
 M6 Patrimonio y Estructura de Capital (Net Worth & Capital Structure)
-Motor 6: GestiÃ³n de patrimonio y estructura de capitales
 """
 
-from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum, Boolean
-from datetime import date
-import enum
+from sqlalchemy import Column, Integer, String, Float, Date, Text, Boolean
 from app.models.base import BaseModel
-
-
-class TipoActivo(str, enum.Enum):
-    """Tipos de activos"""
-    EFECTIVO = "efectivo"
-    CUENTAS_POR_COBRAR = "cuentas_por_cobrar"
-    INVENTARIOS = "inventarios"
-    BIENES_INMUEBLES = "bienes_inmuebles"
-    MAQUINARIA = "maquinaria"
-    VEHÃCULOS = "vehÃ­culos"
-    INTANGIBLES = "intangibles"
-    INVERSIONES = "inversiones"
-
-
-class TipoPasivo(str, enum.Enum):
-    """Tipos de pasivos"""
-    CUENTAS_POR_PAGAR = "cuentas_por_pagar"
-    IMPUESTOS_POR_PAGAR = "impuestos_por_pagar"
-    PRÃ‰STAMOS_CORTO_PLAZO = "prestamos_cp"
-    PRÃ‰STAMOS_LARGO_PLAZO = "prestamos_lp"
-    ARRENDAMIENTOS = "arrendamientos"
-    DEUDAS_EMPLEADOS = "deudas_empleados"
-    PROVISIONES = "provisiones"
 
 
 class Activo(BaseModel):
@@ -98,4 +72,4 @@ class RatiosCapital(BaseModel):
     capital_trabajo = Column(Float, nullable=False)
     liquidez_general = Column(Float, nullable=False)
     liquidez_inmediata = Column(Float, nullable=False)
-    tendencia = Column(String(20), nullable=True)  # mejorando, estable, deterioro
+    tendencia = Column(String(20), nullable=True)
