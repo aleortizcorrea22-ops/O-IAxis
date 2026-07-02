@@ -80,7 +80,7 @@ const API = {
 
   // M7 - Crédito
   creditScore(empresaId, ingresos, deuda, historial) {
-    return this.get(`/api/v1/motors/m7/credit-score?empresa_id=${empresaId}&ingresos_anuales=${ingresos}&deuda_total=${deuda}&historial_pago=${historial}`);
+    return this.request(`/api/v1/motors/m7/credit-score?empresa_id=${empresaId}&ingresos_anuales=${ingresos}&deuda_total=${deuda}&historial_pago=${historial}`, { method: "POST" });
   },
 
   // M10 - Inversiones
