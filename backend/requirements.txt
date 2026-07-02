@@ -1,3 +1,5 @@
+# PostgreSQL support (para producción en Railway/Supabase)
+psycopg2-binary==2.9.9
 fastapi==0.138.1
 uvicorn[standard]==0.30.0
 pydantic==2.7.0

@@ -163,7 +163,7 @@ const Pages = {
               <td>${fmtARS(t.monto)}</td>
               <td style="color:var(--gray-400)">${t.referencia}</td>
               <td><span class="badge badge-info">${t.status}</span></td>
-              <td style="display:flex;gap:6px"><button onclick="editarTransaccion(${t.id}, '${t.tipo}', ${t.monto}, '${t.referencia}')" title="Editar" style="background:var(--teal);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">✏️</button><button onclick="borrarTransaccion(${t.id})" title="Borrar" style="background:var(--danger);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">🗑️</button></td>
+              <td style="display:flex;gap:6px"><button onclick="editarTransaccion(${t.id}, '${t.tipo}', ${t.monto}, '${(t.referencia||'').replace(/'/g,'')}', '${t.fecha_transaccion||''}')" title="Editar" style="background:var(--teal);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">✏️</button><button onclick="borrarTransaccion(${t.id})" title="Borrar" style="background:var(--danger);color:white;border:none;padding:6px;border-radius:4px;cursor:pointer;font-size:14px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">🗑️</button></td>
             </tr>
           `).join("")}
         </tbody>
@@ -688,81 +688,223 @@ async function agregarActivo() {
 
 // Funciones para borrar datos
 async function borrarTransaccion(id) {
-  if (!confirm("¿Borrar esta transacción?")) return;
+  if (!confirm("🗑️ ¿Confirma eliminar esta transacción?")) return;
   try {
     await API.request(`/api/v1/motors/m2/transactions/${id}`, { method: "DELETE" });
-    showToast("Transacción eliminada");
+    showToast("🗑️ Transacción eliminada");
     Pages.tesoreria();
   } catch (e) {
-    showToast("Error al borrar: " + e.message, "error");
+    showToast("❌ Error al eliminar: " + e.message, "error");
   }
 }
 
 async function borrarImpuesto(id) {
-  if (!confirm("¿Borrar este impuesto?")) return;
+  if (!confirm("🗑️ ¿Confirma eliminar este impuesto?")) return;
   try {
     await API.request(`/api/v1/motors/m5/impuestos/${id}`, { method: "DELETE" });
-    showToast("Impuesto eliminado");
+    showToast("🗑️ Impuesto eliminado");
     Pages.fiscal();
   } catch (e) {
-    showToast("Error al borrar: " + e.message, "error");
+    showToast("❌ Error al eliminar: " + e.message, "error");
   }
 }
 
 async function borrarActivo(id) {
-  if (!confirm("¿Borrar este activo?")) return;
+  if (!confirm("🗑️ ¿Confirma eliminar este activo?")) return;
   try {
     await API.request(`/api/v1/motors/m6/activos/${id}`, { method: "DELETE" });
-    showToast("Activo eliminado");
+    showToast("🗑️ Activo eliminado");
     Pages.patrimonio();
   } catch (e) {
-    showToast("Error al borrar: " + e.message, "error");
+    showToast("❌ Error al eliminar: " + e.message, "error");
   }
 }
 
-// Funciones para editar
-async function editarTransaccion(id, tipo, monto, referencia) {
-  const nuevoMonto = prompt(`Nuevo monto (actual: ${monto}):`, monto);
-  if (nuevoMonto === null) return;
+// ===== MODAL DE EDICIÓN =====
+function abrirModal(html) {
+  document.getElementById("modal-overlay").style.display = "flex";
+  document.getElementById("modal-box").style.display = "block";
+  document.getElementById("modal-box").innerHTML = html;
+}
+function cerrarModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+  document.getElementById("modal-box").style.display = "none";
+}
+
+// Editar fila completa M2 — Transacción
+function editarTransaccion(id, tipo, monto, referencia, fecha) {
+  abrirModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">✏️ Editar Transacción #${id}</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="ed-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+          <option value="ingresos" ${tipo==='ingresos'?'selected':''}>Ingresos</option>
+          <option value="egresos" ${tipo==='egresos'?'selected':''}>Egresos</option>
+          <option value="transferencias" ${tipo==='transferencias'?'selected':''}>Transferencias</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monto ($)</label>
+        <input id="ed-monto" type="number" value="${monto}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Referencia / Descripción</label>
+        <input id="ed-ref" type="text" value="${referencia}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input id="ed-fecha" type="date" value="${fecha || new Date().toISOString().split('T')[0]}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="cerrarModal()" class="btn" style="background:var(--navy-3);color:var(--gray-400)">Cancelar</button>
+      <button onclick="guardarTransaccion(${id})" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+    <div id="ed-result" style="margin-top:10px"></div>
+  `);
+}
+
+async function guardarTransaccion(id) {
+  const tipo = document.getElementById("ed-tipo").value;
+  const monto = parseFloat(document.getElementById("ed-monto").value);
+  const referencia = document.getElementById("ed-ref").value;
+  const fecha = document.getElementById("ed-fecha").value;
+  const el = document.getElementById("ed-result");
+  if (!monto || !referencia || !fecha) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
   try {
     await API.request(`/api/v1/motors/m2/transactions/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ tipo, monto: parseFloat(nuevoMonto), referencia, empresa_id: EMPRESA_ID, fecha_transaccion: new Date().toISOString().split('T')[0] })
+      body: JSON.stringify({ tipo, monto, referencia, empresa_id: EMPRESA_ID, fecha_transaccion: fecha })
     });
-    showToast("Transacción actualizada");
+    cerrarModal();
+    showToast("✏️ Transacción actualizada");
     Pages.tesoreria();
   } catch (e) {
-    showToast("Error: " + e.message, "error");
+    el.innerHTML = `<p style="color:var(--danger);font-size:12px">❌ ${e.message}</p>`;
   }
 }
 
-async function editarImpuesto(id, tipo, periodo, base, alicuota) {
-  const nuevaBase = prompt(`Nueva base (actual: ${base}):`, base);
-  if (nuevaBase === null) return;
+// Editar fila completa M5 — Impuesto
+function editarImpuesto(id, tipo, periodo, base, alicuota) {
+  abrirModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">✏️ Editar Impuesto #${id}</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Tipo de Impuesto</label>
+        <select id="ed-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+          <option value="iva" ${tipo==='iva'?'selected':''}>IVA</option>
+          <option value="ingresos_brutos" ${tipo==='ingresos_brutos'?'selected':''}>Ingresos Brutos</option>
+          <option value="ganancias" ${tipo==='ganancias'?'selected':''}>Ganancias</option>
+          <option value="afip" ${tipo==='afip'?'selected':''}>AFIP General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Período (AAAA-MM)</label>
+        <input id="ed-periodo" type="text" value="${periodo}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Base Imponible ($)</label>
+        <input id="ed-base" type="number" value="${base}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Alícuota (%)</label>
+        <input id="ed-alicuota" type="number" value="${(alicuota * 100).toFixed(2)}" step="0.01" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="cerrarModal()" class="btn" style="background:var(--navy-3);color:var(--gray-400)">Cancelar</button>
+      <button onclick="guardarImpuesto(${id})" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+    <div id="ed-result" style="margin-top:10px"></div>
+  `);
+}
+
+async function guardarImpuesto(id) {
+  const tipo = document.getElementById("ed-tipo").value;
+  const periodo = document.getElementById("ed-periodo").value;
+  const base = parseFloat(document.getElementById("ed-base").value);
+  const alicuota = parseFloat(document.getElementById("ed-alicuota").value) / 100;
+  const el = document.getElementById("ed-result");
+  if (!periodo || !base || !alicuota) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
   try {
     await API.request(`/api/v1/motors/m5/impuestos/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ tipo_impuesto: tipo, periodo, base_imponible: parseFloat(nuevaBase), alicuota, empresa_id: EMPRESA_ID, fecha_vencimiento: new Date().toISOString().split('T')[0] })
+      body: JSON.stringify({ tipo_impuesto: tipo, periodo, base_imponible: base, alicuota, empresa_id: EMPRESA_ID, fecha_vencimiento: new Date().toISOString().split('T')[0] })
     });
-    showToast("Impuesto actualizado");
+    cerrarModal();
+    showToast("✏️ Impuesto actualizado");
     Pages.fiscal();
   } catch (e) {
-    showToast("Error: " + e.message, "error");
+    el.innerHTML = `<p style="color:var(--danger);font-size:12px">❌ ${e.message}</p>`;
   }
 }
 
-async function editarActivo(id, tipo, desc, vlibro, vmercado) {
-  const nuevoValor = prompt(`Nuevo valor (actual: ${vlibro}):`, vlibro);
-  if (nuevoValor === null) return;
+// Editar fila completa M6 — Activo
+function editarActivo(id, tipo, desc, vlibro, vmercado) {
+  abrirModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">✏️ Editar Activo #${id}</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="ed-tipo" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+          <option value="inmueble" ${tipo==='inmueble'?'selected':''}>Inmueble</option>
+          <option value="vehiculo" ${tipo==='vehiculo'?'selected':''}>Vehículo</option>
+          <option value="maquinaria" ${tipo==='maquinaria'?'selected':''}>Maquinaria</option>
+          <option value="equipo" ${tipo==='equipo'?'selected':''}>Equipo Informático</option>
+          <option value="otros" ${tipo==='otros'?'selected':''}>Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <input id="ed-desc" type="text" value="${desc}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Valor en Libros ($)</label>
+        <input id="ed-vlibro" type="number" value="${vlibro}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+      <div class="form-group">
+        <label>Valor de Mercado ($)</label>
+        <input id="ed-vmercado" type="number" value="${vmercado}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="cerrarModal()" class="btn" style="background:var(--navy-3);color:var(--gray-400)">Cancelar</button>
+      <button onclick="guardarActivo(${id})" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+    <div id="ed-result" style="margin-top:10px"></div>
+  `);
+}
+
+async function guardarActivo(id) {
+  const tipo = document.getElementById("ed-tipo").value;
+  const desc = document.getElementById("ed-desc").value;
+  const vlibro = parseFloat(document.getElementById("ed-vlibro").value);
+  const vmercado = parseFloat(document.getElementById("ed-vmercado").value);
+  const el = document.getElementById("ed-result");
+  if (!desc || !vlibro || !vmercado) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
   try {
     await API.request(`/api/v1/motors/m6/activos/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ tipo_activo: tipo, descripcion: desc, valor_libro: parseFloat(nuevoValor), valor_mercado: parseFloat(nuevoValor), empresa_id: EMPRESA_ID })
+      body: JSON.stringify({ tipo_activo: tipo, descripcion: desc, valor_libro: vlibro, valor_mercado: vmercado, empresa_id: EMPRESA_ID })
     });
-    showToast("Activo actualizado");
+    cerrarModal();
+    showToast("✏️ Activo actualizado");
     Pages.patrimonio();
   } catch (e) {
-    showToast("Error: " + e.message, "error");
+    el.innerHTML = `<p style="color:var(--danger);font-size:12px">❌ ${e.message}</p>`;
   }
 }
 
@@ -797,3 +939,8 @@ window.borrarActivo = borrarActivo;
 window.editarTransaccion = editarTransaccion;
 window.editarImpuesto = editarImpuesto;
 window.editarActivo = editarActivo;
+window.guardarTransaccion = guardarTransaccion;
+window.guardarImpuesto = guardarImpuesto;
+window.guardarActivo = guardarActivo;
+window.abrirModal = abrirModal;
+window.cerrarModal = cerrarModal;

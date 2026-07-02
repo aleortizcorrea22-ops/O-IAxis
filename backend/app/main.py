@@ -33,11 +33,17 @@ app = FastAPI(
     redoc_url=_redoc_url,
 )
 
-# CORS — Allow frontend to connect
+# CORS — origins desde variable de entorno (comma-separated) o wildcard en prod
+_raw_origins = settings.ALLOWED_ORIGINS.strip()
+if _raw_origins == "*":
+    _origins_list = ["*"]
+else:
+    _origins_list = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3001", "http://localhost:3001", "http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=_origins_list,
+    allow_credentials=_origins_list != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

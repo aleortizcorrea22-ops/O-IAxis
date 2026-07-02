@@ -7,6 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#00B4D8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="O-IAxis">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <!-- URL del backend: sobreescribir en producción con la URL de Railway -->
+  <script src="/config.js"></script>
 </head>
 <body>
 
@@ -52,14 +61,23 @@
     </div>
 
     <div class="sidebar-section">Eje A — Control</div>
+    <div class="sidebar-item" onclick="nav('m1')">
+      <span class="icon">⚙️</span> M1 Control Op.
+    </div>
     <div class="sidebar-item" onclick="nav('tesoreria')">
       <span class="icon">💰</span> M2 Tesorería
+    </div>
+    <div class="sidebar-item" onclick="nav('m3')">
+      <span class="icon">🔄</span> M3 Flujos
+    </div>
+
+    <div class="sidebar-section">Eje B — Contexto</div>
+    <div class="sidebar-item" onclick="nav('m4')">
+      <span class="icon">🌐</span> M4 Macro
     </div>
     <div class="sidebar-item" onclick="nav('fiscal')">
       <span class="icon">📋</span> M5 Fiscal
     </div>
-
-    <div class="sidebar-section">Eje B — Contexto</div>
     <div class="sidebar-item" onclick="nav('patrimonio')">
       <span class="icon">🏦</span> M6 Patrimonio
     </div>
@@ -68,12 +86,21 @@
     <div class="sidebar-item" onclick="nav('credito')">
       <span class="icon">🎯</span> M7 Crédito
     </div>
+    <div class="sidebar-item" onclick="nav('m8')">
+      <span class="icon">🏗️</span> M8 Cap. Trabajo
+    </div>
+    <div class="sidebar-item" onclick="nav('m9')">
+      <span class="icon">🏷️</span> M9 Pricing
+    </div>
     <div class="sidebar-item" onclick="nav('inversiones')">
       <span class="icon">📈</span> M10 Inversiones
     </div>
     <div class="sidebar-item" onclick="nav('fraud')">
       <span class="icon">🔍</span> M11 Fraude
       <span class="badge" id="fraud-badge">0</span>
+    </div>
+    <div class="sidebar-item" onclick="nav('m12')">
+      <span class="icon">📊</span> M12 Benchmark
     </div>
 
     <div class="sidebar-section">Inteligencia</div>
@@ -103,19 +130,23 @@
     </div>
   </nav>
 
+  <!-- SIDEBAR OVERLAY (mobile tap-to-close) -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
   <!-- MAIN -->
   <div id="main">
     <!-- TOPBAR -->
     <header id="topbar">
-      <div id="topbar-title" class="topbar-title">Dashboard Ejecutivo</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="menu-btn" onclick="toggleSidebar()" aria-label="Menú">☰</button>
+        <div id="topbar-title" class="topbar-title">Dashboard Ejecutivo</div>
+      </div>
       <div class="topbar-right">
-        <select id="empresa-selector" onchange="cambiarEmpresa()" style="background:var(--navy);border:1px solid var(--navy-3);border-radius:6px;padding:6px 10px;color:var(--teal);font-size:12px;cursor:pointer;margin-right:16px">
-          <option value="1" style="background:var(--navy);color:var(--white)">Empresa 1 (Demo)</option>
-          <option value="2" style="background:var(--navy);color:var(--white)">Empresa 2</option>
-          <option value="3" style="background:var(--navy);color:var(--white)">Empresa 3</option>
-          <option value="4" style="background:var(--navy);color:var(--white)">Empresa 4</option>
-          <option value="5" style="background:var(--navy);color:var(--white)">Empresa 5</option>
-        </select>
+        <div style="display:flex;align-items:center;gap:6px;margin-right:16px">
+          <select id="empresa-selector" onchange="cambiarEmpresa()" style="background:var(--navy);border:1px solid var(--navy-3);border-radius:6px;padding:6px 10px;color:var(--teal);font-size:12px;cursor:pointer"></select>
+          <button onclick="abrirModalNuevaEmpresa()" title="Agregar nueva empresa" style="background:var(--teal);color:var(--navy);border:none;border-radius:6px;width:28px;height:28px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">+</button>
+          <button onclick="abrirModalGestionEmpresas()" title="Administrar empresas" style="background:var(--navy-3);color:var(--gray-400);border:none;border-radius:6px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">⚙</button>
+        </div>
         <div class="topbar-status">
           <span class="dot"></span>
           <span id="api-status-label">API Conectada</span>
@@ -136,10 +167,189 @@
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
+<!-- MODAL -->
+<div id="modal-overlay" onclick="cerrarModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center"></div>
+<div id="modal-box" onclick="event.stopPropagation()" style="display:none;position:fixed;z-index:1001;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--navy-2);border:1px solid var(--navy-3);border-radius:12px;padding:24px;width:min(540px,92vw);max-height:90vh;overflow-y:auto"></div>
+
 <!-- ===== SCRIPTS ===== -->
 <script>
+// ===== SIDEBAR MOBILE =====
+function toggleSidebar() {
+  const sb = document.getElementById("sidebar");
+  const ov = document.getElementById("sidebar-overlay");
+  sb.classList.toggle("open");
+  ov.classList.toggle("open");
+}
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebar-overlay").classList.remove("open");
+}
+
 // Global config
 const EMPRESA_ID = 1;
+
+// ===== GESTIÓN DE EMPRESAS =====
+const EMPRESAS_DEFAULT = [
+  { id: 1, nombre: "Empresa 1 (Demo)" },
+  { id: 2, nombre: "Empresa 2" },
+  { id: 3, nombre: "Empresa 3" },
+  { id: 4, nombre: "Empresa 4" },
+  { id: 5, nombre: "Empresa 5" },
+];
+
+function getEmpresas() {
+  try {
+    const saved = localStorage.getItem("oiaxis_empresas");
+    return saved ? JSON.parse(saved) : EMPRESAS_DEFAULT;
+  } catch { return EMPRESAS_DEFAULT; }
+}
+
+function saveEmpresas(list) {
+  localStorage.setItem("oiaxis_empresas", JSON.stringify(list));
+}
+
+function renderEmpresaSelector() {
+  const sel = document.getElementById("empresa-selector");
+  if (!sel) return;
+  const empresas = getEmpresas();
+  const current = window.EMPRESA_ID || 1;
+  sel.innerHTML = empresas.map(e =>
+    `<option value="${e.id}" style="background:var(--navy);color:var(--white)" ${e.id === current ? 'selected' : ''}>${e.nombre}</option>`
+  ).join("");
+}
+
+function abrirModalNuevaEmpresa() {
+  const empresas = getEmpresas();
+  const nextId = Math.max(...empresas.map(e => e.id)) + 1;
+  // abrirModal is defined in motors.js but loaded after; use inline approach
+  document.getElementById("modal-overlay").style.display = "flex";
+  document.getElementById("modal-box").style.display = "block";
+  document.getElementById("modal-box").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">🏢 Nueva Empresa</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>ID de Empresa (automático: ${nextId})</label>
+      <input id="new-emp-id" type="number" value="${nextId}" min="${nextId}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Nombre de la Empresa</label>
+      <input id="new-emp-nombre" type="text" placeholder="Ej: Empresa Norte S.A." style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)" autofocus>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="cerrarModal()" class="btn" style="background:var(--navy-3);color:var(--gray-400)">Cancelar</button>
+      <button onclick="guardarNuevaEmpresa()" class="btn btn-primary">+ Agregar Empresa</button>
+    </div>
+    <div id="new-emp-result" style="margin-top:10px"></div>
+  `;
+}
+
+function guardarNuevaEmpresa() {
+  const id = parseInt(document.getElementById("new-emp-id").value);
+  const nombre = document.getElementById("new-emp-nombre").value.trim();
+  const el = document.getElementById("new-emp-result");
+  if (!nombre) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Ingresa un nombre</p>`; return; }
+  const empresas = getEmpresas();
+  if (empresas.find(e => e.id === id)) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Ya existe una empresa con ese ID</p>`; return; }
+  empresas.push({ id, nombre });
+  saveEmpresas(empresas);
+  renderEmpresaSelector();
+  cerrarModal();
+  window.EMPRESA_ID = id;
+  document.getElementById("empresa-selector").value = id;
+  showToast(`🏢 Empresa "${nombre}" creada`);
+}
+
+function abrirModalGestionEmpresas() {
+  const empresas = getEmpresas();
+  document.getElementById("modal-overlay").style.display = "flex";
+  document.getElementById("modal-box").style.display = "block";
+  document.getElementById("modal-box").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">⚙ Administrar Empresas</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div style="margin-bottom:16px">
+      ${empresas.map(e => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--navy-3);border-radius:8px;margin-bottom:8px">
+          <div>
+            <span style="color:var(--teal);font-size:11px;font-weight:600;margin-right:8px">ID ${e.id}</span>
+            <span style="color:var(--white);font-size:13px">${e.nombre}</span>
+            ${e.id === (window.EMPRESA_ID||1) ? '<span style="color:var(--success);font-size:10px;margin-left:8px">● activa</span>' : ''}
+          </div>
+          <div style="display:flex;gap:6px">
+            <button onclick="renombrarEmpresa(${e.id})" title="Renombrar" style="background:var(--teal);color:var(--navy);border:none;border-radius:4px;width:28px;height:28px;font-size:13px;cursor:pointer">✏️</button>
+            ${e.id !== 1 ? `<button onclick="eliminarEmpresa(${e.id})" title="Eliminar" style="background:var(--danger);color:white;border:none;border-radius:4px;width:28px;height:28px;font-size:13px;cursor:pointer">🗑️</button>` : '<span style="width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;color:var(--gray-600);font-size:11px" title="La empresa demo no se puede eliminar">🔒</span>'}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+    <button onclick="cerrarModal();abrirModalNuevaEmpresa()" class="btn btn-primary" style="width:100%">+ Agregar nueva empresa</button>
+    <div id="gest-result" style="margin-top:10px"></div>
+  `;
+}
+
+function renombrarEmpresa(id) {
+  const empresas = getEmpresas();
+  const emp = empresas.find(e => e.id === id);
+  if (!emp) return;
+  document.getElementById("modal-box").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--white)">✏️ Renombrar Empresa ID ${id}</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--gray-400);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Nuevo nombre</label>
+      <input id="ren-nombre" type="text" value="${emp.nombre}" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)" autofocus>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="abrirModalGestionEmpresas()" class="btn" style="background:var(--navy-3);color:var(--gray-400)">Volver</button>
+      <button onclick="guardarRenombreEmpresa(${id})" class="btn btn-primary">Guardar</button>
+    </div>
+    <div id="ren-result" style="margin-top:10px"></div>
+  `;
+}
+
+function guardarRenombreEmpresa(id) {
+  const nuevoNombre = document.getElementById("ren-nombre").value.trim();
+  const el = document.getElementById("ren-result");
+  if (!nuevoNombre) { el.innerHTML = `<p style="color:var(--warning);font-size:12px">Ingresa un nombre</p>`; return; }
+  const empresas = getEmpresas();
+  const emp = empresas.find(e => e.id === id);
+  if (!emp) return;
+  emp.nombre = nuevoNombre;
+  saveEmpresas(empresas);
+  renderEmpresaSelector();
+  cerrarModal();
+  showToast(`✏️ Empresa renombrada a "${nuevoNombre}"`);
+}
+
+function eliminarEmpresa(id) {
+  if (id === 1) { showToast("❌ La empresa demo no se puede eliminar", "error"); return; }
+  if (id === (window.EMPRESA_ID||1)) {
+    if (!confirm("Esta es la empresa activa. ¿Eliminar y volver a Empresa 1?")) return;
+    window.EMPRESA_ID = 1;
+    sessionStorage.setItem("empresaId", "1");
+  } else {
+    const empresas = getEmpresas();
+    const emp = empresas.find(e => e.id === id);
+    if (!confirm(`¿Eliminar "${emp?.nombre || 'esta empresa'}"?`)) return;
+  }
+  const empresas = getEmpresas().filter(e => e.id !== id);
+  saveEmpresas(empresas);
+  renderEmpresaSelector();
+  document.getElementById("empresa-selector").value = window.EMPRESA_ID || 1;
+  showToast("🗑️ Empresa eliminada");
+  abrirModalGestionEmpresas();
+}
+
+window.guardarNuevaEmpresa = guardarNuevaEmpresa;
+window.abrirModalNuevaEmpresa = abrirModalNuevaEmpresa;
+window.abrirModalGestionEmpresas = abrirModalGestionEmpresas;
+window.renombrarEmpresa = renombrarEmpresa;
+window.guardarRenombreEmpresa = guardarRenombreEmpresa;
+window.eliminarEmpresa = eliminarEmpresa;
 
 // Global helpers
 function fmtARS(n) {
@@ -165,50 +375,38 @@ function cambiarEmpresa() {
   const numaEmpresa = document.getElementById("empresa-selector").value;
   window.EMPRESA_ID = parseInt(numaEmpresa);
   sessionStorage.setItem("empresaId", numaEmpresa);
-
-  // Recargar página actual
-  if (currentPage === "dashboard") {
-    renderDashboard();
-  } else if (currentPage === "tesoreria") {
-    Pages.tesoreria();
-  } else if (currentPage === "fiscal") {
-    Pages.fiscal();
-  } else if (currentPage === "patrimonio") {
-    Pages.patrimonio();
-  } else if (currentPage === "fraud") {
-    Pages.fraud();
-  } else if (currentPage === "ml") {
-    Pages.ml();
-  } else if (currentPage === "quantum") {
-    Pages.quantum();
-  }
-
-  toast(`Empresa ${numaEmpresa} seleccionada`);
+  nav(currentPage, true);
+  const emp = getEmpresas().find(e => e.id === parseInt(numaEmpresa));
+  showToast(`🏢 ${emp ? emp.nombre : 'Empresa ' + numaEmpresa}`);
 }
 
 // Cargar empresa guardada
 (function() {
   const saved = sessionStorage.getItem("empresaId");
-  if (saved) {
-    window.EMPRESA_ID = parseInt(saved);
-    document.getElementById("empresa-selector").value = saved;
-  }
+  if (saved) window.EMPRESA_ID = parseInt(saved);
 })();
 
-function nav(page) {
+function nav(page, silent) {
   currentPage = page;
-  // Update active sidebar item
-  document.querySelectorAll(".sidebar-item").forEach(el => el.classList.remove("active"));
-  event.currentTarget.classList.add("active");
-
+  closeSidebar();
+  if (!silent) {
+    document.querySelectorAll(".sidebar-item").forEach(el => el.classList.remove("active"));
+    if (event && event.currentTarget) event.currentTarget.classList.add("active");
+  }
   switch (page) {
     case "dashboard":   renderDashboard(); break;
+    case "m1":          renderM1(); break;
     case "tesoreria":   Pages.tesoreria(); break;
+    case "m3":          renderM3(); break;
+    case "m4":          renderM4(); break;
     case "fiscal":      Pages.fiscal(); break;
-    case "patrimonio":  renderPatrimonio(); break;
+    case "patrimonio":  Pages.patrimonio(); break;
     case "credito":     renderCredito(); break;
+    case "m8":          renderM8(); break;
+    case "m9":          renderM9(); break;
     case "inversiones": renderInversiones(); break;
     case "fraud":       Pages.fraud(); break;
+    case "m12":         renderM12(); break;
     case "ml":          Pages.ml(); break;
     case "quantum":     Pages.quantum(); break;
     case "api":         renderApiDocs(); break;
@@ -248,6 +446,14 @@ function doLogout() {
 
 // ===== INIT =====
 async function initApp() {
+  // Inicializar selector de empresa con datos guardados
+  renderEmpresaSelector();
+  const savedEmp = sessionStorage.getItem("empresaId");
+  if (savedEmp) {
+    window.EMPRESA_ID = parseInt(savedEmp);
+    document.getElementById("empresa-selector").value = savedEmp;
+  }
+
   // Check API health
   try {
     await API.health();
@@ -256,7 +462,7 @@ async function initApp() {
       `<span style="display:inline-block;width:7px;height:7px;background:var(--success);border-radius:50%;margin-right:4px;animation:pulse 2s infinite"></span>localhost:8000`;
   } catch {
     document.getElementById("api-status-label").textContent = "API no disponible";
-    toast("El servidor backend no está disponible en localhost:8000", "error");
+    showToast("El servidor backend no está disponible en localhost:8000", "error");
   }
 
   // Update fraud badge
@@ -363,36 +569,514 @@ async function calcularScore() {
 
 async function renderInversiones() {
   document.getElementById("topbar-title").textContent = "M10 — Inversiones";
-  document.getElementById("content").innerHTML = `<div class="page"><div class="spinner"></div></div>`;
-  const data = await API.inversiones(EMPRESA_ID).catch(() => ({ total_invertido: 0, inversiones: [] }));
   document.getElementById("content").innerHTML = `
     <div class="page">
       <div class="section-header"><div class="section-title">Motor M10 — Inversiones Avanzada</div></div>
-      <div class="kpi-grid" style="margin-bottom:16px">
-        ${kpi("Total Invertido", fmtARS(data.total_invertido), `${data.cantidad || 0} instrumentos`, "pos", "📈")}
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Registrar Inversión</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Instrumento</label>
+            <input id="m10-inst" type="text" placeholder="Ej: FCI Renta Fija, Bono USD" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Tipo</label>
+            <select id="m10-tipo" style="${inputStyle}">
+              <option value="fci">FCI</option>
+              <option value="bono">Bono</option>
+              <option value="accion">Acción</option>
+              <option value="plazo_fijo">Plazo Fijo</option>
+              <option value="crypto">Cripto</option>
+              <option value="inmueble">Inmueble</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Monto ($)</label>
+            <input id="m10-monto" type="number" placeholder="1000000" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Tasa Esperada Anual (ej: 0.35 = 35%)</label>
+            <input id="m10-tasa" type="number" placeholder="0.35" step="0.01" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="agregarM10()">+ Registrar Inversión</button>
+        <div id="m10-result" style="margin-top:12px"></div>
       </div>
-      <div class="card">
-        <div class="card-title">Portafolio de Inversiones</div>
-        ${data.inversiones?.length ? `
-          <div class="table-wrap"><table>
-            <thead><tr><th>Instrumento</th><th>Tipo</th><th>Monto</th><th>Tasa</th><th>Riesgo</th><th>Retorno Anual</th></tr></thead>
-            <tbody>
-              ${data.inversiones.map(i => `
-                <tr>
-                  <td style="font-weight:600">${i.instrumento}</td>
-                  <td><span class="badge badge-info">${i.tipo}</span></td>
-                  <td>${fmtARS(i.monto)}</td>
-                  <td>${(i.tasa*100).toFixed(1)}%</td>
-                  <td><span class="badge ${i.riesgo==='bajo'?'badge-success':i.riesgo==='medio'?'badge-warning':'badge-danger'}">${i.riesgo}</span></td>
-                  <td style="color:var(--success)">${fmtARS(i.monto*i.tasa)}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table></div>
-        ` : `<p style="color:var(--gray-400);font-size:12px">Sin inversiones registradas. Usar <code>POST /api/v1/motors/m10/inversiones</code></p>`}
+      <div id="m10-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM10();
+}
+async function cargarM10() {
+  const data = await API.inversiones(EMPRESA_ID).catch(() => ({ total_invertido: 0, cantidad: 0, inversiones: [] }));
+  let html = `<div class="kpi-grid" style="margin-bottom:16px">
+    ${kpi("Total Invertido", fmtARS(data.total_invertido), `${data.cantidad||0} instrumentos`, "pos", "📈")}
+    ${kpi("Retorno Anual Proy.", fmtARS((data.inversiones||[]).reduce((s,i)=>s+i.monto*i.tasa,0)), "Suma de retornos", "pos", "💹")}
+  </div>
+  <div class="card"><div class="card-title">Portafolio de Inversiones</div>`;
+  if (data.inversiones?.length) {
+    html += `<div class="table-wrap"><table>
+      <thead><tr><th>Instrumento</th><th>Tipo</th><th>Monto</th><th>Tasa</th><th>Riesgo</th><th>Retorno Anual</th></tr></thead>
+      <tbody>${data.inversiones.map(i => `<tr>
+        <td style="font-weight:600">${i.instrumento}</td>
+        <td><span class="badge badge-info">${i.tipo}</span></td>
+        <td>${fmtARS(i.monto)}</td>
+        <td>${(i.tasa*100).toFixed(1)}%</td>
+        <td><span class="badge ${i.riesgo==='bajo'?'badge-success':i.riesgo==='medio'?'badge-warning':'badge-danger'}">${i.riesgo}</span></td>
+        <td style="color:var(--success)">${fmtARS(i.monto*i.tasa)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>`;
+  } else {
+    html += `<p style="color:var(--gray-400);font-size:12px">Sin inversiones registradas. Completá el formulario de arriba.</p>`;
+  }
+  html += `</div>`;
+  document.getElementById("m10-content").innerHTML = html;
+}
+async function agregarM10() {
+  const el = document.getElementById("m10-result");
+  const inst = document.getElementById("m10-inst").value;
+  const tipo = document.getElementById("m10-tipo").value;
+  const monto = parseFloat(document.getElementById("m10-monto").value);
+  const tasa = parseFloat(document.getElementById("m10-tasa").value);
+  if (!inst || isNaN(monto) || isNaN(tasa)) { el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    const r = await API.request(`/api/v1/motors/m10/inversiones?empresa_id=${EMPRESA_ID}&instrumento=${encodeURIComponent(inst)}&tipo=${tipo}&monto=${monto}&tasa_esperada=${tasa}`, { method: "POST" });
+    el.innerHTML = `<p style="color:var(--success)">✓ Inversión registrada — Retorno anual proy.: ${fmtARS(r.retorno_proyectado_anual)}</p>`;
+    document.getElementById("m10-inst").value = "";
+    document.getElementById("m10-monto").value = "";
+    document.getElementById("m10-tasa").value = "";
+    setTimeout(cargarM10, 1000);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+const inputStyle = `width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)`;
+
+// ===== M1 — CONTROL OPERATIVO =====
+async function renderM1() {
+  document.getElementById("topbar-title").textContent = "M1 — Control Operativo";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M1 — Control Operativo</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Registrar Indicador</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Área</label>
+            <select id="m1-area" style="${inputStyle}">
+              <option value="produccion">Producción</option>
+              <option value="ventas">Ventas</option>
+              <option value="logistica">Logística</option>
+              <option value="rrhh">RRHH</option>
+              <option value="it">IT</option>
+              <option value="finanzas">Finanzas</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Nombre del Indicador</label>
+            <input id="m1-nombre" type="text" placeholder="Ej: Productividad por operario" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Valor</label>
+            <input id="m1-valor" type="number" placeholder="85.5" step="0.01" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="agregarM1()">+ Registrar Indicador</button>
+        <div id="m1-result" style="margin-top:12px"></div>
       </div>
+      <div id="m1-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM1();
+}
+async function cargarM1() {
+  const data = await API.get(`/api/v1/motors/m1/indicadores?empresa_id=${EMPRESA_ID}`).catch(() => []);
+  const metricas = await API.get(`/api/v1/motors/m1/metricas/${EMPRESA_ID}`).catch(() => null);
+  let html = "";
+  if (metricas && metricas.eficiencia) {
+    html += `<div class="kpi-grid" style="margin-bottom:16px">
+      ${kpi("Eficiencia Op.", (metricas.eficiencia*100).toFixed(1)+" %", "Operaciones", "pos", "⚙️")}
+      ${kpi("Calidad Procesos", (metricas.calidad*100).toFixed(1)+" %", "Control de calidad", "pos", "✅")}
+      ${kpi("Cumpl. SLA", (metricas.cumplimiento_sla*100).toFixed(1)+" %", "Nivel de servicio", "neutral", "⏱️")}
+      ${kpi("Productividad", (metricas.productividad*100).toFixed(1)+" %", "General", "pos", "📊")}
+    </div>`;
+  }
+  html += `<div class="card"><div class="card-title">Indicadores Registrados</div>`;
+  if (data.length) {
+    html += `<div class="table-wrap"><table>
+      <thead><tr><th>Área</th><th>Indicador</th><th>Valor</th><th>Estado</th></tr></thead>
+      <tbody>${data.map(i => `<tr>
+        <td><span class="badge badge-info">${i.area}</span></td>
+        <td>${i.nombre}</td>
+        <td style="font-weight:600">${i.valor}</td>
+        <td><span class="badge ${i.estado==='ok'||i.estado==='verde'?'badge-success':i.estado==='alerta'?'badge-warning':'badge-danger'}">${i.estado||'—'}</span></td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } else {
+    html += `<p style="color:var(--gray-400);font-size:12px">Sin indicadores registrados. Completá el formulario de arriba.</p>`;
+  }
+  html += `</div>`;
+  document.getElementById("m1-content").innerHTML = html;
+}
+async function agregarM1() {
+  const el = document.getElementById("m1-result");
+  const area = document.getElementById("m1-area").value;
+  const nombre = document.getElementById("m1-nombre").value;
+  const valor = parseFloat(document.getElementById("m1-valor").value);
+  if (!nombre || isNaN(valor)) { el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.request(`/api/v1/motors/m1/indicadores?empresa_id=${EMPRESA_ID}&area=${area}&nombre=${encodeURIComponent(nombre)}&valor=${valor}`, { method: "POST" });
+    el.innerHTML = `<p style="color:var(--success)">✓ Indicador registrado</p>`;
+    document.getElementById("m1-nombre").value = "";
+    document.getElementById("m1-valor").value = "";
+    setTimeout(cargarM1, 1000);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+// ===== M3 — FLUJOS INTERNOS =====
+async function renderM3() {
+  document.getElementById("topbar-title").textContent = "M3 — Flujos Internos";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M3 — Flujos Internos</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Registrar Flujo</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Tipo de Flujo</label>
+            <select id="m3-tipo" style="${inputStyle}">
+              <option value="operativo">Operativo</option>
+              <option value="financiero">Financiero</option>
+              <option value="inversion">Inversión</option>
+              <option value="extraordinario">Extraordinario</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Monto ($)</label>
+            <input id="m3-monto" type="number" placeholder="250000" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Fecha</label>
+            <input id="m3-fecha" type="date" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="agregarM3()">+ Registrar Flujo</button>
+        <div id="m3-result" style="margin-top:12px"></div>
+      </div>
+      <div id="m3-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM3();
+}
+async function cargarM3() {
+  const flujos = await API.get(`/api/v1/motors/m3/flujos?empresa_id=${EMPRESA_ID}`).catch(() => []);
+  const rotacion = await API.get(`/api/v1/motors/m3/rotacion/${EMPRESA_ID}`).catch(() => null);
+  let html = "";
+  if (rotacion && rotacion.dias_rotacion) {
+    html += `<div class="kpi-grid" style="margin-bottom:16px">
+      ${kpi("Días de Rotación", rotacion.dias_rotacion, "Ciclo de fondos", "neutral", "🔄")}
+      ${kpi("Monto Rotado", fmtARS(rotacion.monto_rotado), "Período actual", "pos", "💵")}
+      ${kpi("Eficiencia", (rotacion.eficiencia*100).toFixed(1)+" %", "Flujo de fondos", "pos", "⚡")}
+    </div>`;
+  }
+  html += `<div class="card"><div class="card-title">Flujos Registrados</div>`;
+  if (flujos.length) {
+    html += `<div class="table-wrap"><table>
+      <thead><tr><th>Tipo</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead>
+      <tbody>${flujos.map(f => `<tr>
+        <td><span class="badge badge-info">${f.tipo}</span></td>
+        <td style="font-weight:600">${fmtARS(f.monto)}</td>
+        <td>${f.fecha}</td>
+        <td><span class="badge ${f.estado==='completado'?'badge-success':'badge-warning'}">${f.estado||'pendiente'}</span></td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } else {
+    html += `<p style="color:var(--gray-400);font-size:12px">Sin flujos registrados. Completá el formulario de arriba.</p>`;
+  }
+  html += `</div>`;
+  document.getElementById("m3-content").innerHTML = html;
+}
+async function agregarM3() {
+  const el = document.getElementById("m3-result");
+  const tipo = document.getElementById("m3-tipo").value;
+  const monto = parseFloat(document.getElementById("m3-monto").value);
+  const fecha = document.getElementById("m3-fecha").value;
+  if (!monto || !fecha) { el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.request(`/api/v1/motors/m3/flujos?empresa_id=${EMPRESA_ID}&tipo_flujo=${tipo}&monto=${monto}&fecha=${fecha}`, { method: "POST" });
+    el.innerHTML = `<p style="color:var(--success)">✓ Flujo registrado</p>`;
+    document.getElementById("m3-monto").value = "";
+    setTimeout(cargarM3, 1000);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+// ===== M4 — MACRO =====
+async function renderM4() {
+  document.getElementById("topbar-title").textContent = "M4 — Contexto Macro";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M4 — Contexto Macroeconómico</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Cargar Indicador Macro</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Variable</label>
+            <select id="m4-var" style="${inputStyle}">
+              <option value="inflacion">Inflación mensual (%)</option>
+              <option value="tipo_cambio">Tipo de cambio ($/USD)</option>
+              <option value="tasa_bcra">Tasa BCRA (%)</option>
+              <option value="ipc">IPC</option>
+              <option value="pbi">Crecimiento PBI (%)</option>
+              <option value="desempleo">Desempleo (%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Valor</label>
+            <input id="m4-valor" type="number" placeholder="4.2" step="0.01" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="agregarM4()">+ Cargar Indicador</button>
+        <div id="m4-result" style="margin-top:12px"></div>
+      </div>
+      <div id="m4-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM4();
+}
+async function cargarM4() {
+  const indicadores = await API.get(`/api/v1/motors/m4/indicadores-macro`).catch(() => []);
+  const impacto = await API.get(`/api/v1/motors/m4/impacto/${EMPRESA_ID}`).catch(() => []);
+  let html = `<div class="grid-2">
+    <div class="card"><div class="card-title">Indicadores Macroeconómicos</div>`;
+  if (indicadores.length) {
+    html += `<div class="table-wrap"><table>
+      <thead><tr><th>Variable</th><th>Valor</th><th>Var. Mes</th></tr></thead>
+      <tbody>${indicadores.map(i => `<tr>
+        <td><span class="badge badge-info">${i.variable}</span></td>
+        <td style="font-weight:600">${i.valor}</td>
+        <td style="color:${(i.variacion_mes||0)>=0?'var(--success)':'var(--danger)'}">${i.variacion_mes!=null?(i.variacion_mes>=0?'+':'')+i.variacion_mes.toFixed(2)+'%':'—'}</td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } else {
+    html += `<p style="color:var(--gray-400);font-size:12px">Sin datos macro. Completá el formulario de arriba.</p>`;
+  }
+  html += `</div><div class="card"><div class="card-title">Impacto en la Empresa</div>`;
+  if (impacto.length) {
+    html += `<div class="table-wrap"><table>
+      <thead><tr><th>Variable</th><th>Impacto</th><th>Magnitud</th></tr></thead>
+      <tbody>${impacto.map(i => `<tr>
+        <td>${i.variable}</td>
+        <td style="font-size:12px">${i.impacto}</td>
+        <td><span class="badge ${i.magnitud==='alto'?'badge-danger':i.magnitud==='medio'?'badge-warning':'badge-success'}">${i.magnitud||'—'}</span></td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } else {
+    html += `<p style="color:var(--gray-400);font-size:12px">Sin análisis de impacto disponible.</p>`;
+  }
+  html += `</div></div>`;
+  document.getElementById("m4-content").innerHTML = html;
+}
+async function agregarM4() {
+  const el = document.getElementById("m4-result");
+  const variable = document.getElementById("m4-var").value;
+  const valor = parseFloat(document.getElementById("m4-valor").value);
+  if (isNaN(valor)) { el.innerHTML = `<p style="color:var(--warning)">Ingresa un valor</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    await API.request(`/api/v1/motors/m4/indicadores-macro?variable=${variable}&valor=${valor}`, { method: "POST" });
+    el.innerHTML = `<p style="color:var(--success)">✓ Indicador cargado</p>`;
+    document.getElementById("m4-valor").value = "";
+    setTimeout(cargarM4, 1000);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+// ===== M8 — CAPITAL DE TRABAJO =====
+async function renderM8() {
+  document.getElementById("topbar-title").textContent = "M8 — Capital de Trabajo";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M8 — Capital de Trabajo</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Analizar Ciclo de Conversión de Efectivo</div>
+        <p style="color:var(--gray-400);font-size:12px;margin-bottom:12px">Ingresá los días promedio de cada etapa del ciclo operativo.</p>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Días de Inventario</label>
+            <input id="m8-inv" type="number" placeholder="30" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Días de Cobro (cuentas a cobrar)</label>
+            <input id="m8-cobro" type="number" placeholder="45" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Días de Pago (cuentas a pagar)</label>
+            <input id="m8-pago" type="number" placeholder="20" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="analizarM8()">Analizar Ciclo</button>
+        <div id="m8-result" style="margin-top:12px"></div>
+      </div>
+      <div id="m8-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM8();
+}
+async function cargarM8() {
+  const data = await API.get(`/api/v1/motors/m8/capital-trabajo?empresa_id=${EMPRESA_ID}`).catch(() => null);
+  let html = "";
+  if (data && data.ciclo_conversion_efectivo != null) {
+    const ccc = data.ciclo_conversion_efectivo;
+    html += `<div class="kpi-grid" style="margin-bottom:16px">
+      ${kpi("Ciclo Conv. Efectivo", ccc.toFixed(1)+" días", "Días totales del ciclo", ccc<30?"pos":ccc<60?"neutral":"neg", "🔄")}
+      ${kpi("Días Inventario", data.dias_inventario+" días", "Stock en depósito", "neutral", "📦")}
+      ${kpi("Días Cobro", data.dias_cobro+" días", "Plazo clientes", "neutral", "📤")}
+      ${kpi("Días Pago", data.dias_pago+" días", "Plazo proveedores", "pos", "📥")}
     </div>
-  `;
+    <div class="card"><div class="card-title">Recomendación</div>
+      <p style="color:var(--gray-300);font-size:13px;line-height:1.7">${data.recomendacion}</p>
+    </div>`;
+  } else {
+    html = `<div class="card"><p style="color:var(--gray-400);font-size:12px">Sin análisis previo. Completá el formulario de arriba.</p></div>`;
+  }
+  document.getElementById("m8-content").innerHTML = html;
+}
+async function analizarM8() {
+  const el = document.getElementById("m8-result");
+  const inv = parseFloat(document.getElementById("m8-inv").value);
+  const cobro = parseFloat(document.getElementById("m8-cobro").value);
+  const pago = parseFloat(document.getElementById("m8-pago").value);
+  if (isNaN(inv)||isNaN(cobro)||isNaN(pago)) { el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    const data = await API.request(`/api/v1/motors/m8/capital-trabajo?empresa_id=${EMPRESA_ID}&dias_inventario=${inv}&dias_cobro=${cobro}&dias_pago=${pago}`, { method: "POST" });
+    el.innerHTML = `<p style="color:var(--success)">✓ Ciclo: <strong>${data.ciclo_conversion_efectivo} días</strong> — ${data.recomendacion}</p>`;
+    setTimeout(cargarM8, 1200);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+}
+
+// ===== M9 — PRICING =====
+async function renderM9() {
+  document.getElementById("topbar-title").textContent = "M9 — Pricing";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M9 — Pricing Intelligence</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Análisis de Precio Óptimo</div>
+        <p style="color:var(--gray-400);font-size:12px;margin-bottom:12px">Dictamen de carácter exclusivamente informativo.</p>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Producto / Servicio</label>
+            <input id="pr-producto" type="text" placeholder="Ej: Servicio mensual" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Precio Actual ($)</label>
+            <input id="pr-actual" type="number" placeholder="1500" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Costo Unitario ($)</label>
+            <input id="pr-costo" type="number" placeholder="1000" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Elasticidad precio-demanda</label>
+            <input id="pr-elas" type="number" placeholder="-1.5" step="0.1" style="${inputStyle}">
+            <small style="color:var(--gray-600)">Típico: −1 a −3 (negativo = mayor precio baja demanda)</small>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="calcularPricing()">Calcular Precio Óptimo</button>
+        <div id="pricing-result" style="margin-top:16px"></div>
+      </div>
+      <div id="m9-content"></div>
+    </div>`;
+}
+
+async function calcularPricing() {
+  const el = document.getElementById("pricing-result");
+  const producto = document.getElementById("pr-producto").value;
+  const actual = parseFloat(document.getElementById("pr-actual").value);
+  const costo = parseFloat(document.getElementById("pr-costo").value);
+  const elas = parseFloat(document.getElementById("pr-elas").value);
+  if (!producto || isNaN(actual) || isNaN(costo) || isNaN(elas)) {
+    el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return;
+  }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    const r = await API.request(
+      `/api/v1/motors/m9/pricing?empresa_id=${EMPRESA_ID}&producto=${encodeURIComponent(producto)}&precio_actual=${actual}&costo_unitario=${costo}&elasticidad=${elas}`,
+      { method: "POST" }
+    );
+    const variacion = r.variacion_sugerida_pct;
+    el.innerHTML = `
+      <div class="kpi-grid" style="margin-top:12px">
+        ${kpi("Precio Óptimo Sugerido", fmtARS(r.precio_optimo_sugerido), "Calculado por M9", "pos", "🏷️")}
+        ${kpi("Precio Actual", fmtARS(r.precio_actual), "Ingresado", "neutral", "💰")}
+        ${kpi("Variación Sugerida", (variacion>=0?"+":"")+variacion?.toFixed(1)+"%", "Ajuste recomendado", variacion>=0?"pos":"neg", "📊")}
+        ${kpi("Margen Actual", r.margen_actual_pct?.toFixed(1)+"%", "Sobre precio actual", "pos", "📈")}
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div style="font-size:13px;color:var(--gray-400)">${r.dictamen}</div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<p style="color:var(--danger);font-size:12px">${e.message}</p>`;
+  }
+}
+
+// ===== M12 — BENCHMARKING =====
+async function renderM12() {
+  document.getElementById("topbar-title").textContent = "M12 — Benchmarking";
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header"><div class="section-title">Motor M12 — Benchmarking Sectorial</div></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Comparar contra el Sector</div>
+        <p style="color:var(--gray-400);font-size:12px;margin-bottom:12px">Ingresá un indicador de la empresa y el valor promedio del sector para ver tu posición relativa.</p>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group"><label>Sector</label>
+            <select id="m12-sector" style="${inputStyle}">
+              <option value="industrial">Industrial</option>
+              <option value="comercio">Comercio</option>
+              <option value="servicios">Servicios</option>
+              <option value="agro">Agro</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="construccion">Construcción</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Métrica a comparar</label>
+            <select id="m12-metrica" style="${inputStyle}">
+              <option value="margen_bruto">Margen Bruto (%)</option>
+              <option value="rentabilidad">Rentabilidad sobre ventas (%)</option>
+              <option value="rotacion_activos">Rotación de activos</option>
+              <option value="liquidez">Ratio de liquidez</option>
+              <option value="endeudamiento">Endeudamiento (%)</option>
+              <option value="crecimiento_ventas">Crecimiento ventas (%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Valor de tu empresa</label>
+            <input id="m12-empresa" type="number" placeholder="25.5" step="0.01" style="${inputStyle}">
+          </div>
+          <div class="form-group"><label>Mediana del sector (referencia)</label>
+            <input id="m12-sector-val" type="number" placeholder="20.0" step="0.01" style="${inputStyle}">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="agregarM12()">Comparar contra Sector</button>
+        <div id="m12-result" style="margin-top:12px"></div>
+      </div>
+      <div id="m12-content"><div class="spinner"></div></div>
+    </div>`;
+  await cargarM12();
+}
+async function cargarM12() {
+  const data = await API.get(`/api/v1/motors/m12/benchmark/${EMPRESA_ID}`).catch(() => null);
+  let html = "";
+  if (data && Array.isArray(data) && data.length) {
+    html += `<div class="card"><div class="card-title">Historial de Comparativas</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Sector</th><th>Métrica</th><th>Tu valor</th><th>Mediana sector</th><th>Posición</th><th>Percentil</th></tr></thead>
+        <tbody>${data.map(d => `<tr>
+          <td><span class="badge badge-info">${d.sector}</span></td>
+          <td>${d.metrica}</td>
+          <td style="font-weight:600">${d.valor_empresa}</td>
+          <td style="color:var(--gray-400)">${d.mediana_sector}</td>
+          <td><span class="badge ${d.posicion==='lider'?'badge-success':d.posicion==='sobre_media'?'badge-info':d.posicion==='media'?'badge-warning':'badge-danger'}">${d.posicion?.replace('_',' ')}</span></td>
+          <td>P${d.percentil_sector}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </div>`;
+  } else {
+    html = `<div class="card"><p style="color:var(--gray-400);font-size:12px">Sin comparativas registradas. Completá el formulario de arriba para ver tu posición en el sector.</p></div>`;
+  }
+  document.getElementById("m12-content").innerHTML = html;
+}
+async function agregarM12() {
+  const el = document.getElementById("m12-result");
+  const sector = document.getElementById("m12-sector").value;
+  const metrica = document.getElementById("m12-metrica").value;
+  const valEmp = parseFloat(document.getElementById("m12-empresa").value);
+  const valSec = parseFloat(document.getElementById("m12-sector-val").value);
+  if (isNaN(valEmp) || isNaN(valSec)) { el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
+  try {
+    const r = await API.request(`/api/v1/motors/m12/benchmark?empresa_id=${EMPRESA_ID}&sector=${sector}&metrica=${encodeURIComponent(metrica)}&valor_empresa=${valEmp}&mediana_sector=${valSec}`, { method: "POST" });
+    const colorPos = r.posicion==='lider'?'var(--success)':r.posicion==='sobre_media'?'var(--teal)':r.posicion==='media'?'var(--warning)':'var(--danger)';
+    el.innerHTML = `<div style="margin-top:8px;padding:12px;background:var(--navy);border-radius:8px;border-left:3px solid ${colorPos}">
+      <div style="font-weight:600;color:${colorPos}">Posición: ${r.posicion?.replace('_',' ').toUpperCase()} — Percentil ${r.percentil}</div>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:4px">${r.insight}</div>
+    </div>`;
+    setTimeout(cargarM12, 1200);
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
 }
 
 function renderApiDocs() {
@@ -422,6 +1106,15 @@ function toast(msg, type = "info") {
   setTimeout(() => t.remove(), 4000);
 }
 window.toast = toast;
+window.showToast = toast;
+window.calcularPricing = calcularPricing;
+window.calcularScore = calcularScore;
+window.agregarM1 = agregarM1;
+window.agregarM3 = agregarM3;
+window.agregarM4 = agregarM4;
+window.analizarM8 = analizarM8;
+window.agregarM10 = agregarM10;
+window.agregarM12 = agregarM12;
 
 // ===== BOOTSTRAP =====
 (function() {
@@ -435,6 +1128,14 @@ window.toast = toast;
     document.getElementById("login-page").style.display = "flex";
   }
 })();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 </script>
 
 </body>

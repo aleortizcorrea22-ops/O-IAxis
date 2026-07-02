@@ -2,7 +2,9 @@
  * O-IAxis API Service — cliente HTTP para el backend FastAPI
  */
 
-const BASE_URL = "http://127.0.0.1:8000";
+// En producción, apunta al backend en Railway (variable inyectada en el build)
+// En desarrollo local, usa localhost:8000
+const BASE_URL = window.OIAXIS_API_URL || "http://127.0.0.1:8000";
 
 const API = {
   // ===== AUTH TOKEN =====

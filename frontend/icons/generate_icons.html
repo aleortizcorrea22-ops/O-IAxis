@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><body>
+<canvas id="c" width="512" height="512"></canvas>
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+
+function draw(size) {
+  c.width = size; c.height = size;
+  ctx.fillStyle = "#0D1B2A";
+  ctx.beginPath();
+  ctx.roundRect(0, 0, size, size, size * 0.18);
+  ctx.fill();
+
+  // Teal circle background
+  ctx.fillStyle = "#00B4D8";
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size*0.36, 0, Math.PI*2);
+  ctx.fill();
+
+  // O-I text
+  ctx.fillStyle = "#0D1B2A";
+  ctx.font = `bold ${size*0.32}px Inter, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("OI", size/2, size/2 - size*0.01);
+
+  // Vrilon sub
+  ctx.fillStyle = "#90E0EF";
+  ctx.font = `${size*0.08}px Inter, sans-serif`;
+  ctx.fillText("VRILON", size/2, size*0.72);
+}
+
+// Generate 192
+draw(192);
+const a192 = document.createElement("a");
+a192.href = c.toDataURL("image/png");
+a192.download = "icon-192.png";
+a192.textContent = "⬇ Descargar icon-192.png";
+document.body.appendChild(a192);
+
+// Generate 512
+draw(512);
+const a512 = document.createElement("a");
+a512.href = c.toDataURL("image/png");
+a512.download = "icon-512.png";
+a512.textContent = " | ⬇ Descargar icon-512.png";
+document.body.appendChild(a512);
+</script>
+</body></html>
