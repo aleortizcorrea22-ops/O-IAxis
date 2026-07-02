@@ -1,6 +1,6 @@
 """
 M1 Control Operativo Interno (Internal Operational Control)
-Motor 1: Gestión y control de operaciones internas
+Motor 1: GestiÃ³n y control de operaciones internas
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum, Boolean, JSON
@@ -10,7 +10,7 @@ from app.models.base import BaseModel
 
 
 class AreaOperativa(str, enum.Enum):
-    """Áreas operativas de la empresa"""
+    """Ãreas operativas de la empresa"""
     VENTAS = "ventas"
     COMPRAS = "compras"
     PRODUCCION = "produccion"
@@ -25,7 +25,7 @@ class IndicadorOperacional(BaseModel):
     __tablename__ = "m1_indicador_operacional"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    area = Column(Enum(AreaOperativa), nullable=False, index=True)
+    area = Column(String(50), nullable=False, index=True)
     fecha = Column(Date, nullable=False, index=True)
     nombre_indicador = Column(String(200), nullable=False)
     valor_actual = Column(Float, nullable=False)
@@ -43,7 +43,7 @@ class Proceso(BaseModel):
     empresa_id = Column(Integer, nullable=False, index=True)
     codigo_proceso = Column(String(50), unique=True, nullable=False)
     nombre = Column(String(200), nullable=False)
-    area = Column(Enum(AreaOperativa), nullable=False)
+    area = Column(String(50), nullable=False)
     responsable = Column(String(200), nullable=False)
     descripcion = Column(Text, nullable=True)
     periodicidad = Column(String(50), nullable=True)  # diaria, semanal, mensual
@@ -51,7 +51,7 @@ class Proceso(BaseModel):
 
 
 class RegistroAuditoria(BaseModel):
-    """Registro de auditoría de procesos"""
+    """Registro de auditorÃ­a de procesos"""
 
     __tablename__ = "m1_registro_auditoria"
 
@@ -67,7 +67,7 @@ class RegistroAuditoria(BaseModel):
 
 
 class MetricaDesempenio(BaseModel):
-    """Métricas de desempeño operacional"""
+    """MÃ©tricas de desempeÃ±o operacional"""
 
     __tablename__ = "m1_metrica_desempenio"
 

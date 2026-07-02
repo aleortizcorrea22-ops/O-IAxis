@@ -1,6 +1,6 @@
 """
 M5 Fiscal (Tax Management) Engine Models
-Motor 5: Gestión Fiscal e Impositiva
+Motor 5: GestiÃ³n Fiscal e Impositiva
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum, Boolean
@@ -33,7 +33,7 @@ class ImpuestoDetalle(BaseModel):
     __tablename__ = "m5_impuesto_detalle"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    tipo_impuesto = Column(Enum(TaxType), nullable=False)
+    tipo_impuesto = Column(String(50), nullable=False)
     periodo = Column(String(20), nullable=False)  # YYYYMM format
     fecha_vencimiento = Column(Date, nullable=False, index=True)
     base_imponible = Column(Float, nullable=False)
@@ -45,12 +45,12 @@ class ImpuestoDetalle(BaseModel):
 
 
 class FiscalObligacion(BaseModel):
-    """Obligación fiscal importante"""
+    """ObligaciÃ³n fiscal importante"""
 
     __tablename__ = "m5_obligacion"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    tipo = Column(Enum(FiscalObligationType), nullable=False)
+    tipo = Column(String(50), nullable=False)
     descripcion = Column(Text, nullable=False)
     fecha_vencimiento = Column(Date, nullable=False, index=True)
     estatus = Column(String(20), default="pendiente")
@@ -67,13 +67,13 @@ class RetencionesCobradas(BaseModel):
     numero_comprobante = Column(String(50), unique=True, nullable=False)
     razon_social_tercero = Column(String(200), nullable=False)
     cuit_tercero = Column(String(13), nullable=False)
-    tipo_impuesto = Column(Enum(TaxType), nullable=False)
+    tipo_impuesto = Column(String(50), nullable=False)
     monto_retenido = Column(Float, nullable=False)
     descripcion = Column(Text, nullable=True)
 
 
 class ResultadoFiscalProyectado(BaseModel):
-    """Proyección de resultado fiscal"""
+    """ProyecciÃ³n de resultado fiscal"""
 
     __tablename__ = "m5_resultado_proyectado"
 

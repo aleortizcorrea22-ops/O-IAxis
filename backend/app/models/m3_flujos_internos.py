@@ -1,6 +1,6 @@
 """
 M3 Flujos de Efectivo Internos (Internal Cash Flows Management)
-Motor 3: Gestión de flujos internos de caja y fondos
+Motor 3: GestiÃ³n de flujos internos de caja y fondos
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum, ForeignKey
@@ -27,7 +27,7 @@ class FlujoInterno(BaseModel):
     __tablename__ = "m3_flujo_interno"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    tipo_flujo = Column(Enum(TipoFlujoInterno), nullable=False, index=True)
+    tipo_flujo = Column(String(50), nullable=False, index=True)
     fecha_programada = Column(Date, nullable=False, index=True)
     fecha_ejecutado = Column(Date, nullable=True)
     monto = Column(Float, nullable=False)
@@ -38,7 +38,7 @@ class FlujoInterno(BaseModel):
 
 
 class RotacionFondos(BaseModel):
-    """Ciclo de rotación de fondos"""
+    """Ciclo de rotaciÃ³n de fondos"""
 
     __tablename__ = "m3_rotacion_fondos"
 
@@ -52,7 +52,7 @@ class RotacionFondos(BaseModel):
 
 
 class AsignacionPresupuestaria(BaseModel):
-    """Asignación de presupuesto por centro de costo"""
+    """AsignaciÃ³n de presupuesto por centro de costo"""
 
     __tablename__ = "m3_asignacion_presupuestaria"
 
@@ -68,7 +68,7 @@ class AsignacionPresupuestaria(BaseModel):
 
 
 class ProjectionFlujoCaja(BaseModel):
-    """Proyección detallada de flujo de caja"""
+    """ProyecciÃ³n detallada de flujo de caja"""
 
     __tablename__ = "m3_proyeccion_flujo"
 

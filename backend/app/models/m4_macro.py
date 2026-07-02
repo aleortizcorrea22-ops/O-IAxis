@@ -1,6 +1,6 @@
 """
-M4 Contexto Macroeconómico (Macroeconomic Context)
-Motor 4: Seguimiento de variables macroeconómicas e impacto
+M4 Contexto MacroeconÃ³mico (Macroeconomic Context)
+Motor 4: Seguimiento de variables macroeconÃ³micas e impacto
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum
@@ -10,7 +10,7 @@ from app.models.base import BaseModel
 
 
 class VariableMacro(str, enum.Enum):
-    """Variables macroeconómicas principales"""
+    """Variables macroeconÃ³micas principales"""
     PIB = "pib"
     INFLACION = "inflacion"
     DESEMPLEO = "desempleo"
@@ -21,11 +21,11 @@ class VariableMacro(str, enum.Enum):
 
 
 class IndicadorMacroeconomico(BaseModel):
-    """Indicadores macroeconómicos"""
+    """Indicadores macroeconÃ³micos"""
 
     __tablename__ = "m4_indicador_macro"
 
-    variable = Column(Enum(VariableMacro), nullable=False, index=True)
+    variable = Column(String(50), nullable=False, index=True)
     fecha = Column(Date, nullable=False, index=True, unique=True)
     valor = Column(Float, nullable=False)
     variacion_mes = Column(Float, nullable=True)
@@ -36,13 +36,13 @@ class IndicadorMacroeconomico(BaseModel):
 
 
 class ImpactoMacroEmpresa(BaseModel):
-    """Análisis de impacto macro en empresa específica"""
+    """AnÃ¡lisis de impacto macro en empresa especÃ­fica"""
 
     __tablename__ = "m4_impacto_macro_empresa"
 
     empresa_id = Column(Integer, nullable=False, index=True)
     fecha = Column(Date, nullable=False, index=True)
-    variable_macro = Column(Enum(VariableMacro), nullable=False)
+    variable_macro = Column(String(50), nullable=False)
     impacto_esperado = Column(String(20), nullable=False)  # positivo, negativo, neutral
     magnitud_impacto = Column(Float, nullable=False)  # porcentaje
     areas_afectadas = Column(String(500), nullable=True)  # lista separada por comas
@@ -51,7 +51,7 @@ class ImpactoMacroEmpresa(BaseModel):
 
 
 class EscenarioMacro(BaseModel):
-    """Escenarios macroeconómicos definidos"""
+    """Escenarios macroeconÃ³micos definidos"""
 
     __tablename__ = "m4_escenario_macro"
 
@@ -73,7 +73,7 @@ class SensibilidadMacro(BaseModel):
     __tablename__ = "m4_sensibilidad_macro"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    variable_macro = Column(Enum(VariableMacro), nullable=False)
+    variable_macro = Column(String(50), nullable=False)
     elasticidad = Column(Float, nullable=False)  # cambio % en empresa por cambio % en variable
     rango_valido_min = Column(Float, nullable=True)
     rango_valido_max = Column(Float, nullable=True)

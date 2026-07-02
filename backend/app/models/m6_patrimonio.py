@@ -1,6 +1,6 @@
 """
 M6 Patrimonio y Estructura de Capital (Net Worth & Capital Structure)
-Motor 6: Gestión de patrimonio y estructura de capitales
+Motor 6: GestiÃ³n de patrimonio y estructura de capitales
 """
 
 from sqlalchemy import Column, Integer, String, Float, Date, Text, Enum, Boolean
@@ -16,7 +16,7 @@ class TipoActivo(str, enum.Enum):
     INVENTARIOS = "inventarios"
     BIENES_INMUEBLES = "bienes_inmuebles"
     MAQUINARIA = "maquinaria"
-    VEHÍCULOS = "vehículos"
+    VEHÃCULOS = "vehÃ­culos"
     INTANGIBLES = "intangibles"
     INVERSIONES = "inversiones"
 
@@ -25,8 +25,8 @@ class TipoPasivo(str, enum.Enum):
     """Tipos de pasivos"""
     CUENTAS_POR_PAGAR = "cuentas_por_pagar"
     IMPUESTOS_POR_PAGAR = "impuestos_por_pagar"
-    PRÉSTAMOS_CORTO_PLAZO = "prestamos_cp"
-    PRÉSTAMOS_LARGO_PLAZO = "prestamos_lp"
+    PRÃ‰STAMOS_CORTO_PLAZO = "prestamos_cp"
+    PRÃ‰STAMOS_LARGO_PLAZO = "prestamos_lp"
     ARRENDAMIENTOS = "arrendamientos"
     DEUDAS_EMPLEADOS = "deudas_empleados"
     PROVISIONES = "provisiones"
@@ -38,7 +38,7 @@ class Activo(BaseModel):
     __tablename__ = "m6_activo"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    tipo_activo = Column(Enum(TipoActivo), nullable=False, index=True)
+    tipo_activo = Column(String(50), nullable=False, index=True)
     descripcion = Column(String(200), nullable=False)
     valor_libro = Column(Float, nullable=False)
     valor_mercado = Column(Float, nullable=True)
@@ -56,7 +56,7 @@ class Pasivo(BaseModel):
     __tablename__ = "m6_pasivo"
 
     empresa_id = Column(Integer, nullable=False, index=True)
-    tipo_pasivo = Column(Enum(TipoPasivo), nullable=False, index=True)
+    tipo_pasivo = Column(String(50), nullable=False, index=True)
     descripcion = Column(String(200), nullable=False)
     monto_total = Column(Float, nullable=False)
     monto_pagado = Column(Float, default=0.0)
