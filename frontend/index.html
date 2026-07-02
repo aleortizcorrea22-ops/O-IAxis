@@ -1291,6 +1291,11 @@ window.agregarM12 = agregarM12;
 
 <script>
 if ('serviceWorker' in navigator) {
+  // Eliminar todos los SW viejos y limpiar caché antes de registrar el nuevo
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
