@@ -29,10 +29,10 @@ class ImpuestoDetalleCreate(BaseModel):
     empresa_id: int
     tipo_impuesto: TaxTypeEnum
     periodo: str  # YYYYMM
-    fecha_vencimiento: date
+    fecha_vencimiento: Optional[date] = None
     base_imponible: float = Field(ge=0)
     alicuota: float = Field(ge=0, le=100)
-    monto_impuesto: float = Field(ge=0)
+    monto_impuesto: Optional[float] = None
     descripcion: Optional[str] = None
 
 

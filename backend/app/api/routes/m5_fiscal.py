@@ -29,11 +29,16 @@ def create_impuesto(
     db: Session = Depends(get_db)
 ):
     """Crear detalle de impuesto"""
-    monto_calculado = impuesto.base_imponible * (impuesto.alicuota / 100)
+    alicuota = impuesto.alicuota if impuesto.alicuota <= 1 else impuesto.alicuota / 100
+    monto_calculado = impuesto.monto_impuesto or round(impuesto.base_imponible * alicuota, 2)
+    vencimiento = impuesto.fecha_vencimiento or (date.today().replace(day=1) + __import__('datetime').timedelta(days=30))
 
+    data = impuesto.dict(exclude={"monto_impuesto", "fecha_vencimiento", "alicuota"})
     db_impuesto = ImpuestoDetalle(
-        **impuesto.dict(),
-        monto_impuesto=monto_calculado
+        **data,
+        alicuota=alicuota * 100 if alicuota <= 1 else alicuota,
+        monto_impuesto=monto_calculado,
+        fecha_vencimiento=vencimiento
     )
     db.add(db_impuesto)
     db.commit()
