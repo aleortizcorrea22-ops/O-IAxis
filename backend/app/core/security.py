@@ -15,9 +15,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token", auto_error=False)
 
 DEMO_USERS = {
-    "rodolfo": {"hashed": "$2b$12$placeholder", "plain": "cto2024",   "role": "CTO",    "nombre": "Rodolfo"},
-    "admin":   {"hashed": "$2b$12$placeholder", "plain": "admin2024", "role": "Admin",  "nombre": "Admin"},
-    "demo":    {"hashed": "$2b$12$placeholder", "plain": "demo",      "role": "Viewer", "nombre": "Demo"},
+    "rodolfo":  {"hashed": "$2b$12$placeholder", "plain": "cto2024",   "role": "CTO",    "nombre": "Rodolfo"},
+    "fernando": {"hashed": "$2b$12$placeholder", "plain": "cto2025",   "role": "CTO",    "nombre": "Fernando"},
+    "admin":    {"hashed": "$2b$12$placeholder", "plain": "admin2024", "role": "Admin",  "nombre": "Admin"},
+    "demo":     {"hashed": "$2b$12$placeholder", "plain": "demo",      "role": "Viewer", "nombre": "Demo"},
 }
 
 
