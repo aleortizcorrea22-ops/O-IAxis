@@ -114,6 +114,10 @@ const Pages = {
               <label>Fecha</label>
               <input id="teso-fecha" type="date" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
             </div>
+            <div class="form-group">
+              <label>Referencia</label>
+              <input id="teso-ref" type="text" placeholder="REF-001" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
           </div>
           <button class="btn btn-primary" onclick="agregarTransaccion()">+ Agregar Transacción</button>
           <div id="teso-result" style="margin-top:12px"></div>
@@ -599,6 +603,7 @@ async function agregarTransaccion() {
   const monto = parseFloat(document.getElementById("teso-monto").value);
   const desc = document.getElementById("teso-desc").value;
   const fecha = document.getElementById("teso-fecha").value;
+  const referencia = document.getElementById("teso-ref").value || "REF-001";
 
   if (!monto || !desc || !fecha) {
     el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`;
@@ -612,12 +617,14 @@ async function agregarTransaccion() {
       tipo,
       monto,
       descripcion: desc,
-      fecha
+      fecha_transaccion: fecha,
+      referencia
     });
     el.innerHTML = `<p style="color:var(--success)">✓ Transacción agregada</p>`;
     document.getElementById("teso-monto").value = "";
     document.getElementById("teso-desc").value = "";
     document.getElementById("teso-fecha").value = "";
+    document.getElementById("teso-ref").value = "";
     setTimeout(() => Pages.tesoreria(), 1500);
   } catch (e) {
     el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
