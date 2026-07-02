@@ -10,3 +10,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 aiofiles
+numpy
+scikit-learn
+pennylane
