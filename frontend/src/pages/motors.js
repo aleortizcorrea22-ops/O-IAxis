@@ -684,13 +684,8 @@ async function agregarActivo() {
 
   el.innerHTML = `<div class="spinner"></div>`;
   try {
-    await API.post("/api/v1/motors/m6/activos", {
-      empresa_id: EMPRESA_ID,
-      tipo,
-      descripcion: desc,
-      valor_libro: vlibro,
-      valor_mercado: vmercado
-    });
+    const params = new URLSearchParams({ empresa_id: EMPRESA_ID, tipo_activo: tipo, descripcion: desc, valor: vlibro });
+    await API.request(`/api/v1/motors/m6/activos?${params}`, { method: "POST" });
     el.innerHTML = `<p style="color:var(--success)">✓ Activo agregado</p>`;
     document.getElementById("pat-desc").value = "";
     document.getElementById("pat-vlibro").value = "";
