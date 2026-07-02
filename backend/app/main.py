@@ -12,7 +12,7 @@ from app.db.database import Base, engine
 from app.core.config import settings
 from app.api.routes import (
     auth, m2_tesoreria, m5_fiscal, m1_m3_m4_m6,
-    m7_m12_frontera, ml_predictions, quantum
+    m7_m12_frontera, ml_predictions, quantum, ai_analysis
 )
 from app.services.seed import seed_demo_data
 
@@ -62,6 +62,9 @@ app.include_router(ml_predictions.router)
 
 # Include Quantum optimization routes
 app.include_router(quantum.router)
+
+# Include AI Analysis routes
+app.include_router(ai_analysis.router)
 
 
 @app.get("/health", tags=["Health"])

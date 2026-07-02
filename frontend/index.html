@@ -101,6 +101,9 @@
     </div>
 
     <div class="sidebar-section">Inteligencia</div>
+    <div class="sidebar-item" onclick="nav('ai')">
+      <span class="icon">✨</span> Análisis IA
+    </div>
     <div class="sidebar-item" onclick="nav('ml')">
       <span class="icon">🤖</span> ML Engine
     </div>
@@ -404,6 +407,7 @@ function nav(page, silent) {
     case "inversiones": renderInversiones(); break;
     case "fraud":       Pages.fraud(); break;
     case "m12":         renderM12(); break;
+    case "ai":          renderAI(); break;
     case "ml":          Pages.ml(); break;
     case "quantum":     Pages.quantum(); break;
     case "api":         renderApiDocs(); break;
@@ -472,6 +476,164 @@ async function initApp() {
 
   // Render dashboard
   renderDashboard();
+}
+
+// ===== AI ANALYSIS =====
+async function renderAI() {
+  document.getElementById("topbar-title").textContent = "✨ Análisis IA";
+  const saved = JSON.parse(localStorage.getItem("oiaxis_ai_cfg") || "{}");
+
+  document.getElementById("content").innerHTML = `
+    <div class="page">
+      <div class="section-header">
+        <div class="section-title">✨ Análisis con Inteligencia Artificial</div>
+      </div>
+
+      <!-- CONFIG CARD -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">⚙️ Configuración de API</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group">
+            <label>Proveedor</label>
+            <select id="ai-provider" style="${inputStyle}">
+              <option value="">Auto (Claude → Groq)</option>
+              <option value="claude" ${saved.provider==="claude"?"selected":""}>Claude (Anthropic)</option>
+              <option value="groq"   ${saved.provider==="groq"  ?"selected":""}>Groq (Llama 3 — Gratis)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>API Key <span style="color:var(--gray-600);font-size:11px">(opcional si está en el servidor)</span></label>
+            <input id="ai-key" type="password" placeholder="sk-ant-... o gsk_..." value="${saved.key||""}" style="${inputStyle}">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary" onclick="guardarAICfg()">💾 Guardar configuración</button>
+          <button class="btn" style="background:var(--navy-3);color:var(--gray-400)" onclick="testAI()">🔌 Probar conexión</button>
+          <span id="ai-cfg-status" style="font-size:12px;color:var(--gray-400)"></span>
+        </div>
+        <p style="font-size:11px;color:var(--gray-600);margin-top:10px">
+          🔑 <strong>Cómo obtener una key gratis:</strong>
+          Claude → <a href="https://console.anthropic.com" target="_blank" style="color:var(--teal)">console.anthropic.com</a> ($5 crédito inicial) &nbsp;|&nbsp;
+          Groq → <a href="https://console.groq.com" target="_blank" style="color:var(--teal)">console.groq.com</a> (100% gratis)
+        </p>
+      </div>
+
+      <!-- ANÁLISIS CARD -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🔍 Tipo de Análisis</div>
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="form-group">
+            <label>¿Qué querés analizar?</label>
+            <select id="ai-tipo" style="${inputStyle}" onchange="actualizarPrompt()">
+              <option value="general">📊 Situación financiera general</option>
+              <option value="riesgos">⚠️ Detección de riesgos</option>
+              <option value="liquidez">💧 Análisis de liquidez y caja</option>
+              <option value="fiscal">📋 Posición fiscal e impuestos</option>
+              <option value="inversiones">📈 Recomendaciones de inversión</option>
+              <option value="custom">✏️ Pregunta personalizada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Pregunta / Instrucción</label>
+            <textarea id="ai-prompt" rows="3" style="${inputStyle};resize:vertical">Analizá la situación financiera general de la empresa y dime los principales riesgos y oportunidades.</textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onclick="ejecutarAnalisis()">
+          ✨ Analizar con IA
+        </button>
+      </div>
+
+      <!-- RESULTADO -->
+      <div id="ai-result"></div>
+    </div>
+  `;
+}
+
+function guardarAICfg() {
+  const cfg = {
+    provider: document.getElementById("ai-provider").value,
+    key: document.getElementById("ai-key").value.trim()
+  };
+  localStorage.setItem("oiaxis_ai_cfg", JSON.stringify(cfg));
+  document.getElementById("ai-cfg-status").textContent = "✓ Guardado";
+  document.getElementById("ai-cfg-status").style.color = "var(--success)";
+}
+
+async function testAI() {
+  const el = document.getElementById("ai-cfg-status");
+  el.textContent = "Probando..."; el.style.color = "var(--gray-400)";
+  try {
+    const status = await API.aiStatus();
+    const parts = [];
+    if (status.claude) parts.push("Claude ✓");
+    if (status.groq)   parts.push("Groq ✓");
+    if (!parts.length) parts.push("Sin key en servidor — usá key manual");
+    el.textContent = parts.join(" | ");
+    el.style.color = "var(--success)";
+  } catch(e) {
+    el.textContent = "Error: " + e.message;
+    el.style.color = "var(--danger)";
+  }
+}
+
+function actualizarPrompt() {
+  const prompts = {
+    general:     "Analizá la situación financiera general de la empresa y dime los principales riesgos y oportunidades.",
+    riesgos:     "Identificá todos los riesgos financieros presentes en los datos. Clasificalos por severidad (alto/medio/bajo) y sugería acciones.",
+    liquidez:    "Analizá la posición de liquidez y flujo de caja. ¿Hay riesgo de iliquidez? ¿Cuántos días de caja disponibles hay?",
+    fiscal:      "Revisá la posición fiscal. ¿Hay impuestos vencidos o próximos a vencer? ¿Hay riesgos de multas o mora?",
+    inversiones: "Evaluá el portafolio de inversiones y recomendá ajustes para maximizar retorno según el perfil de riesgo de la empresa.",
+    custom:      ""
+  };
+  const tipo = document.getElementById("ai-tipo").value;
+  if (tipo !== "custom") document.getElementById("ai-prompt").value = prompts[tipo];
+}
+
+async function ejecutarAnalisis() {
+  const el = document.getElementById("ai-result");
+  el.innerHTML = `<div class="card"><div class="spinner"></div><p style="color:var(--gray-400);font-size:13px;margin-top:12px;text-align:center">Consultando IA... puede tomar unos segundos</p></div>`;
+
+  const cfg  = JSON.parse(localStorage.getItem("oiaxis_ai_cfg") || "{}");
+  const prompt = document.getElementById("ai-prompt").value;
+  const provider = cfg.provider || document.getElementById("ai-provider").value || null;
+  const apiKey   = cfg.key || document.getElementById("ai-key").value.trim() || null;
+
+  // Recolectar datos financieros disponibles
+  const [teso, fiscal, activos] = await Promise.allSettled([
+    API.tesoreriaResumen(EMPRESA_ID),
+    API.fiscalResumen(EMPRESA_ID),
+    API.activos(EMPRESA_ID),
+  ]);
+  const context = {
+    empresa_id: EMPRESA_ID,
+    tesoreria: teso.status === "fulfilled" ? teso.value : null,
+    fiscal:    fiscal.status === "fulfilled" ? fiscal.value : null,
+    patrimonio: activos.status === "fulfilled" ? activos.value : null,
+  };
+
+  try {
+    const r = await API.aiAnalyze(context, prompt, provider, apiKey);
+    const providerBadge = r.provider === "claude"
+      ? `<span style="background:rgba(204,102,0,.2);color:#f90;font-size:11px;padding:2px 8px;border-radius:4px">Claude ✓</span>`
+      : `<span style="background:rgba(0,180,100,.2);color:var(--success);font-size:11px;padding:2px 8px;border-radius:4px">Groq ✓</span>`;
+    el.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin:0">📄 Análisis IA</div>
+          ${providerBadge}
+        </div>
+        <div style="font-size:13px;line-height:1.7;color:var(--gray-200);white-space:pre-wrap">${r.response}</div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `
+      <div class="card">
+        <p style="color:var(--danger)">❌ ${e.message}</p>
+        <p style="color:var(--gray-400);font-size:12px;margin-top:8px">
+          Asegurate de ingresar una API key válida en la configuración de arriba.<br>
+          Groq es 100% gratis → <a href="https://console.groq.com" target="_blank" style="color:var(--teal)">console.groq.com</a>
+        </p>
+      </div>`;
+  }
 }
 
 // ===== SIMPLE PAGES =====

@@ -104,6 +104,12 @@ const API = {
   quantumPortfolio(body) { return this.post("/api/v1/quantum/optimize/portfolio", body); },
   quantumPayments(body) { return this.post("/api/v1/quantum/optimize/payments", body); },
   quantumResources(body) { return this.post("/api/v1/quantum/optimize/resources", body); },
+
+  // AI Analysis
+  aiStatus() { return this.get("/api/v1/ai/status"); },
+  aiAnalyze(context, prompt, provider, apiKey) {
+    return this.post("/api/v1/ai/analyze", { context, prompt, provider: provider || null, api_key: apiKey || null });
+  },
 };
 
 window.API = API;
