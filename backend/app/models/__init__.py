@@ -36,8 +36,7 @@ from app.models.m4_macro import (
 
 # M6 - Patrimonio
 from app.models.m6_patrimonio import (
-    Activo, Pasivo, EstadoPatrimonial, RatiosCapital,
-    TipoActivo, TipoPasivo
+    Activo, Pasivo, EstadoPatrimonial, RatiosCapital
 )
 
 # M7-M12 - Finanzas de Frontera
@@ -66,7 +65,6 @@ __all__ = [
     "VariableMacro",
     # M6
     "Activo", "Pasivo", "EstadoPatrimonial", "RatiosCapital",
-    "TipoActivo", "TipoPasivo",
     # M7-M12
     "CreditScore", "CapitalTrabajo", "PricingIntelligence",
     "InversionAvanzada", "AlertaFraude", "BenchmarkSectorial",

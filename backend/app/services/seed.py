@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from app.db.database import SessionLocal
 from app.models.m2_tesoreria import TesoreriaTransaction, TransactionType, TransactionStatus
 from app.models.m5_fiscal import ImpuestoDetalle, TaxType
-from app.models.m6_patrimonio import Activo, Pasivo, TipoActivo, TipoPasivo
+from app.models.m6_patrimonio import Activo, Pasivo
 
 
 def seed_demo_data():
@@ -111,7 +111,7 @@ def seed_demo_data():
         activos = [
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.BIENES_INMUEBLES,
+                tipo_activo="bienes_inmuebles",
                 descripcion="Oficina central - CABA",
                 valor_libro=5000000,
                 valor_mercado=7200000,
@@ -119,7 +119,7 @@ def seed_demo_data():
             ),
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.VEHÍCULOS,
+                tipo_activo="vehiculos",
                 descripcion="Camion de reparto 2022",
                 valor_libro=850000,
                 valor_mercado=720000,
@@ -127,7 +127,7 @@ def seed_demo_data():
             ),
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.MAQUINARIA,
+                tipo_activo="maquinaria",
                 descripcion="Maquina de produccion CNC",
                 valor_libro=1200000,
                 valor_mercado=950000,
@@ -135,7 +135,7 @@ def seed_demo_data():
             ),
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.INTANGIBLES,
+                tipo_activo="intangibles",
                 descripcion="Servidores y network",
                 valor_libro=320000,
                 valor_mercado=180000,
@@ -143,7 +143,7 @@ def seed_demo_data():
             ),
             Activo(
                 empresa_id=1,
-                tipo_activo=TipoActivo.INVERSIONES,
+                tipo_activo="inversiones",
                 descripcion="Muebles y equipamiento oficina",
                 valor_libro=150000,
                 valor_mercado=80000,
@@ -157,7 +157,7 @@ def seed_demo_data():
         pasivos = [
             Pasivo(
                 empresa_id=1,
-                tipo_pasivo=TipoPasivo.PRÉSTAMOS_LARGO_PLAZO,
+                tipo_pasivo="prestamos_lp",
                 descripcion="Prestamo Banco Galicia - 36 meses",
                 monto_total=2500000,
                 tasa_interes=0.125,
@@ -167,7 +167,7 @@ def seed_demo_data():
             ),
             Pasivo(
                 empresa_id=1,
-                tipo_pasivo=TipoPasivo.CUENTAS_POR_PAGAR,
+                tipo_pasivo="cuentas_por_pagar",
                 descripcion="Credito proveedor materias primas",
                 monto_total=450000,
                 tasa_interes=0.08,
