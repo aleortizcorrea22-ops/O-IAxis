@@ -211,6 +211,10 @@ const Pages = {
               <label>Alícuota (%)</label>
               <input id="fisc-alicuota" type="number" placeholder="21" step="0.01" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
             </div>
+            <div class="form-group">
+              <label>Fecha Vencimiento</label>
+              <input id="fisc-vencimiento" type="date" style="width:100%;background:var(--navy);border:1px solid var(--navy-3);border-radius:8px;padding:9px 12px;color:var(--white)">
+            </div>
           </div>
           <button class="btn btn-primary" onclick="agregarImpuesto()">+ Registrar Impuesto</button>
           <div id="fisc-result" style="margin-top:12px"></div>
@@ -637,8 +641,9 @@ async function agregarImpuesto() {
   const periodo = document.getElementById("fisc-periodo").value;
   const base = parseFloat(document.getElementById("fisc-base").value);
   const alicuota = parseFloat(document.getElementById("fisc-alicuota").value) / 100;
+  const vencimiento = document.getElementById("fisc-vencimiento").value;
 
-  if (!periodo || !base || !alicuota) {
+  if (!periodo || !base || !alicuota || !vencimiento) {
     el.innerHTML = `<p style="color:var(--warning)">Completa todos los campos</p>`;
     return;
   }
@@ -650,12 +655,15 @@ async function agregarImpuesto() {
       tipo_impuesto: tipo,
       periodo,
       base_imponible: base,
-      alicuota
+      alicuota,
+      monto_impuesto: Math.round(base * alicuota * 100) / 100,
+      fecha_vencimiento: vencimiento
     });
     el.innerHTML = `<p style="color:var(--success)">✓ Impuesto registrado</p>`;
     document.getElementById("fisc-base").value = "";
     document.getElementById("fisc-periodo").value = "";
     document.getElementById("fisc-alicuota").value = "";
+    document.getElementById("fisc-vencimiento").value = "";
     setTimeout(() => Pages.fiscal(), 1500);
   } catch (e) {
     el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
