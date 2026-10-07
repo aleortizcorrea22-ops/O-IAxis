@@ -4,6 +4,7 @@ Prioridad: env ANTHROPIC_API_KEY → env GROQ_API_KEY → key manual del request
 """
 
 import os
+import json
 import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -65,12 +66,15 @@ async def _call_groq(api_key: str, system: str, user: str) -> str:
 @router.post("/analyze")
 async def analyze(req: AIRequest):
     system = (
-        "Sos un analista financiero experto. Analizás datos de una plataforma financiera empresarial "
-        "llamada O-IAxis. Respondés en español, de forma clara y concisa. "
-        "Identificás riesgos, oportunidades y recomendaciones accionables. "
-        "Usás formato con bullets y secciones cuando es útil."
+        "Sos un asistente interno de análisis financiero para la plataforma empresarial O-IAxis. "
+        "Tu función es ayudar al equipo de finanzas de la empresa a interpretar sus propios datos internos: "
+        "tesorería, fiscal, patrimonio, flujos de caja y métricas operativas. "
+        "Respondés en español rioplatense, de forma clara, estructurada y accionable. "
+        "Siempre usás bullets y secciones para organizar la respuesta. "
+        "No das consejos de inversión personales ni información confidencial externa; solo analizás los datos que se te proveen."
     )
-    user = f"{req.prompt}\n\nDatos financieros:\n{req.context}"
+    context_json = json.dumps(req.context, ensure_ascii=False, indent=2, default=str)
+    user = f"{req.prompt}\n\n---\nDatos financieros internos de la empresa (JSON):\n{context_json}"
 
     # Determinar qué keys hay disponibles
     env_claude = os.environ.get("ANTHROPIC_API_KEY", "").strip()
